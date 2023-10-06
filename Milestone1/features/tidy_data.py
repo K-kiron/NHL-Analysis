@@ -3,8 +3,8 @@ import os
 import glob
 import pandas as pd
 
-def tidy_data(year, season, game_id):
-    with open(os.path.join(f'data/{year}/{season}/', f'{game_id}.json'), 'r') as file:
+def tidy_data(path, year, season, game_id):
+    with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
         game_data = json.load(file)
     
     shot_data_temp = []
@@ -21,11 +21,18 @@ def tidy_data(year, season, game_id):
             periodTime = eventData['about']['periodTime']
             team = eventData['team']['triCode']
             eventType = eventData['result']['event']
-            x_coordinate = eventData['coordinates']['x']
-            y_coordinate = eventData['coordinates']['y']
+            try:
+                x_coordinate = eventData['coordinates']['x']
+                y_coordinate = eventData['coordinates']['y']
+            except KeyError:
+                x_coordinate = None
+                y_coordinate = None
             shooter = eventData['players'][0]['player']['fullName']
             goalie = eventData['players'][-1]['player']['fullName']
-            shotType = eventData['result']['secondaryType']
+            try:
+                shotType = eventData['result']['secondaryType']
+            except KeyError:
+                shotType = None
             if eventType == 'Goal':
                 try:
                     emptyNet = eventData['result']['emptyNet']
@@ -57,8 +64,8 @@ def tidy_data(year, season, game_id):
                 'periodTime': periodTime,
                 'team': team,
                 'eventType': eventType,
-                'x coordinate': x_coordinate,
-                'y coordinate': y_coordinate,
+                'x_coordinate': x_coordinate,
+                'y_coordinate': y_coordinate,
                 'goal_location': goalLocation,
                 'shooter': shooter,
                 'goalie': goalie,
