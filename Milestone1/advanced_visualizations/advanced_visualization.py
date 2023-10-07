@@ -1,14 +1,3 @@
-import json
-import os
-import glob
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import re
-import ipywidgets as widgets
-from IPython.display import display, Output
-
 import os
 import json
 import pandas as pd
@@ -16,7 +5,7 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 # Import the tidy_data function from '../features/tidy_data.py'
-from features.tidy_data import tidy_data  # Update the path as needed
+from features.tidy_data import tidy_data  
 
 # Define the data path
 data_path = '../data/IFT6758_Data'
