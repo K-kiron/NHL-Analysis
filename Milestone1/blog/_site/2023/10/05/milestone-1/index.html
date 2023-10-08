@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+  <head>
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+  <title>
+    
+      Milestone 1 &middot; NHL Analytics Blog
+    
+  </title>
+
+  
+  <link rel="canonical" href="http://localhost:4000/2023/10/05/milestone-1/">
+  
+
+  <link rel="stylesheet" href="http://localhost:4000/public/css/poole.css">
+  <link rel="stylesheet" href="http://localhost:4000/public/css/syntax.css">
+  <link rel="stylesheet" href="http://localhost:4000/public/css/lanyon.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://localhost:4000/public/apple-touch-icon-precomposed.png">
+  <link rel="shortcut icon" href="http://localhost:4000/public/favicon.ico">
+
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="http://localhost:4000/atom.xml">
+
+  
+</head>
+
+
+  <body>
+
+    <!-- Target for toggling the sidebar `.sidebar-checkbox` is for regular
+     styles, `#sidebar-checkbox` for behavior. -->
+<input type="checkbox" class="sidebar-checkbox" id="sidebar-checkbox">
+
+<!-- Toggleable sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-item">
+    <p>A reserved <a href="https://jekyllrb.com" target="_blank">Jekyll</a> theme that places the utmost gravity on content with a hidden drawer. Made by <a href="https://twitter.com/mdo" target="_blank">@mdo</a>.</p>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="sidebar-nav-item" href="http://localhost:4000/">Home</a>
+
+    
+
+    
+    
+      
+        
+      
+    
+      
+        
+      
+    
+      
+        
+          <a class="sidebar-nav-item" href="http://localhost:4000/about/">About</a>
+        
+      
+    
+      
+    
+
+    <span class="sidebar-nav-item">Currently v1.1.0</span>
+  </nav>
+
+  <div class="sidebar-item">
+    <p>
+      &copy; 2023. All rights reserved.
+    </p>
+  </div>
+</div>
+
+
+    <!-- Wrap is the content to shift when toggling the sidebar. We wrap the
+         content to avoid any CSS collisions with our real content. -->
+    <div class="wrap">
+      <div class="masthead">
+        <div class="container">
+          <h3 class="masthead-title">
+            <a href="/" title="Home">NHL Analytics Blog</a>
+            <small></small>
+          </h3>
+        </div>
+      </div>
+
+      <div class="container content">
+        <div class="post">
+  <h1 class="post-title">Milestone 1</h1>
+  <span class="post-date">05 Oct 2023</span>
+  <h2 id="question-1">Question 1</h2>
+
+<p>The play-by-play data was downloaded from the public NHL APIs for Regular season and Playoffs.
+The following NHL endpoint was used to download the data:</p>
+<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://statsapi.web.nhl.com/api/v1/game/[GAME_ID]/feed/live/
+</code></pre></div></div>
+<p>The <strong>GAME_ID</strong> path parameter was constructed for each game in Regular season
+and Playoffs from the <a href="https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md#game-ids">unofficial API documentation</a> 
+of NHL APIs for all games in seasons from <strong>2016-17</strong> to <strong>2020-21</strong>.</p>
+
+<p><img src="./images/GAME_ID.png" alt="My image Name" /></p>
+
+<p>The IDs maintain a specific structure which is as follows:</p>
+<ol>
+  <li>All the IDs consist of 10 digits.</li>
+  <li>First 4 digits ascertain the season in which the game was played. 
+For example, all games played in <strong>2018-19</strong> season will start with <strong>2018</strong>.</li>
+  <li>The next 2 digits ascertain the type of game i.e. whether the game was played in 
+<strong>Preseason, Regular season, Playoffs or All Star.</strong></li>
+  <li>The last 4 digits ascertain the specific game number in the season denoted by
+the preceding 2 digits.</li>
+</ol>
+
+<p>For example, the following Python function was used to generate the game IDs.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_game_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">season</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">season</span><span class="si">}{</span><span class="n">game_type</span><span class="si">}{</span><span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s">'</span>
+</code></pre></div></div>
+
+<p>The <strong>game_number</strong> parameter in the above function was constructed a bit 
+differently for Regular season and Playoff games.
+<br />
+<br /></p>
+<h3 id="regular-season">Regular Season</h3>
+<p>The ID was fairly straightforward for Regular season games. Here’s how it was constructed:</p>
+<ul>
+  <li>Get the season in which the game was played (e.g. 2016, 2017, 2018, 2019, 2020).</li>
+  <li>Get the corresponding number for the type of game (<strong>‘02’</strong> in this case).</li>
+  <li>Get the game number which can range from 1 to the total number of games in a given season.</li>
+</ul>
+
+<p>For example, the ID <strong><em>2018020143</em></strong> denotes the game number ‘143’ 
+played in 2018 Regular season <em>(Vancouver Canucks vs Arizona Coyotes)</em>.
+<br />
+<br />
+Following Python snippet generates the game ID and obtains the corresponding data for Regular season games:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Loop in a single hockey season e.g. 2016 (2016-17 season), 2020 (2020-21 season)
+</span><span class="k">for</span> <span class="n">season</span><span class="p">,</span> <span class="n">games</span> <span class="ow">in</span> <span class="n">seasons_to_game_volume_map</span><span class="p">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c1"># Loop inside a particular game type i.e. regular or playoffs
+</span>    <span class="k">for</span> <span class="n">game_type</span> <span class="ow">in</span> <span class="n">game_types</span><span class="p">:</span>
+        <span class="c1"># Check the game type. If it is regular then the last 4 digits
+</span>        <span class="c1"># should be the game number
+</span>        <span class="k">if</span> <span class="n">game_type</span> <span class="o">==</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">games</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">))</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h3 id="playoffs">Playoffs</h3>
+<p>The Playoffs consist of 4 rounds with the 1st round having 8 matchups, 2nd round having 4 matchups,
+3rd round having 2 matchups and the final round having 1 matchup.
+<br />
+<br />
+Also, each of the matchups can have 7 games, out of which games 5, 6 and 7 do not necessarily have to be played.
+<br />
+<br />
+Here’s how the <strong>game_number</strong> parameter was constructed for Playoff games:</p>
+<ul>
+  <li>First 2 digits specify the round (i.e. ‘01’, ‘02’, ‘03’, ‘04’)</li>
+  <li>The 3rd digit is the matchup number. It can range from 1 to 8 for round 1, 1 to 4 for round 2, 
+1 to 2 for round 3 and 1 for round 4.</li>
+  <li>The 4th digit is the game number. For each matchup, it can range from 1 to 7.</li>
+</ul>
+
+<p>For example, the game ID <strong><em>2017030314</em></strong> denotes the 4th game of the 1st matchup in 
+the 3rd round of 2017-18 Playoffs <em>(Tampa Bay Lightning vs Washington Capitals)</em>.
+<br />
+<br />
+<em> Note: The first 6 digits of the Playoffs game ID follow the same pattern as the Regular season games.
+The only difference is that the number for type of game is <strong>‘03’</strong>.</em></p>
+
+<p>Following Python snippet generates the game ID and obtains the corresponding data for Playoff games:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">else</span><span class="p">:</span>
+    <span class="n">total_match_ups</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">round_num</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Continually divide total_match_ups as after each round
+</span>    <span class="c1"># half of the teams are eliminated
+</span>    <span class="k">while</span> <span class="n">total_match_ups</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">match_up</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">total_match_ups</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+                <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">value</span><span class="p">,</span>
+                                           <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">round_num</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}{</span><span class="n">match_up</span><span class="si">}{</span><span class="n">game_number</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+                <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
+        <span class="n">total_match_ups</span> <span class="o">=</span> <span class="n">total_match_ups</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">round_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<p>The class <strong><em>scrape_nhl_data</em></strong> does the work of downloading all the data. Following
+is the code for the same:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">scrape_nhl_data</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_game_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">season</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">season</span><span class="si">}{</span><span class="n">game_type</span><span class="si">}{</span><span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s">'</span>
+
+    <span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">season</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SupportsIndex</span><span class="p">,</span> <span class="nb">slice</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">season</span> <span class="o">!=</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span> <span class="ow">and</span> <span class="s">'endDateTime'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span><span class="p">[</span><span class="s">'gameData'</span><span class="p">][</span><span class="s">'datetime'</span><span class="p">]:</span>
+            <span class="k">return</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">loc</span><span class="si">}</span><span class="s">.json'</span><span class="p">,</span> <span class="s">'w+'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">'utf-8'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">scrape_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">game_id</span><span class="p">,</span> <span class="n">game_type</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'https://statsapi.web.nhl.com/api/v1/game/</span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s">/feed/live/'</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">time</span><span class="p">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">req</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
+            <span class="n">res</span><span class="p">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">write_data</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s">'</span><span class="p">,</span> <span class="n">game_type</span><span class="p">,</span> <span class="n">res</span><span class="p">.</span><span class="n">json</span><span class="p">())</span>
+        <span class="k">except</span> <span class="n">req</span><span class="p">.</span><span class="n">exceptions</span><span class="p">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'API failed for </span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s"> with status code </span><span class="si">{</span><span class="n">err</span><span class="p">.</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">game_type</span><span class="si">}</span><span class="s"> trace: </span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_play_by_play_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                              <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                              <span class="n">seasons_to_game_volume_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                              <span class="n">game_types</span><span class="p">:</span> <span class="nb">list</span>
+                              <span class="p">):</span>
+        <span class="s">"""Created folders and individual json files for
+                Arguments:
+                    path (str): Location where the files should be created.
+                    Ideally it should be the 'data' folder of our repository.
+
+                    Note: Do not precede the path with a '/'. If the data
+                    needs to be saved in the same directory as this script then
+                    pass an empty string ''.
+
+                    seasons_to_game_volume_map (dict of str: int): Map of seasons
+                    for which the data is required and the corresponding number of
+                    games in that season. For e.g. it will have the key as '2016'
+                    for the 2016-17 season.
+
+                    game_types (dict of str: str): List of game types for which
+                    data needs to be retrieved.
+
+                Return:
+                    Folder containing data for each hockey season. These folders in
+                    turn contain play-by-play data for regular and playoff games.
+        """</span>
+        <span class="c1"># Loop in a single hockey season e.g. 2016 (2016-17 season), 2020 (2020-21 season)
+</span>        <span class="k">for</span> <span class="n">season</span><span class="p">,</span> <span class="n">games</span> <span class="ow">in</span> <span class="n">seasons_to_game_volume_map</span><span class="p">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># Loop inside a particular game type i.e. regular or playoffs
+</span>            <span class="k">for</span> <span class="n">game_type</span> <span class="ow">in</span> <span class="n">game_types</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">game_type</span><span class="si">}</span><span class="s">'</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loc</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">game_type</span><span class="si">}</span><span class="s">'</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">exists</span><span class="p">(</span><span class="n">loc</span><span class="p">):</span>
+                    <span class="n">os</span><span class="p">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+
+                <span class="c1"># Check the game type. If it is regular then the last 4 digits
+</span>                <span class="c1"># should be the game number
+</span>                <span class="k">if</span> <span class="n">game_type</span> <span class="o">==</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">games</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
+
+                <span class="c1"># Otherwise, game_type == 'playoff' and the last 4 digits
+</span>                <span class="c1"># should be composed as follows:
+</span>                <span class="c1"># first 2 digits -&gt; round number (can be 01, 02, 03, 04)
+</span>                <span class="c1"># third digit -&gt; match up (can be upto 8, 4, 2, 1 for
+</span>                <span class="c1"># the above mentioned round numbers)
+</span>                <span class="c1"># fourth digit -&gt; game number (can be from 1 to 7)
+</span>                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">total_match_ups</span> <span class="o">=</span> <span class="mi">8</span>
+                    <span class="n">round_num</span> <span class="o">=</span> <span class="mi">1</span>
+
+                    <span class="c1"># Continually divide total_match_ups as after each round
+</span>                    <span class="c1"># half of the teams are eliminated
+</span>                    <span class="k">while</span> <span class="n">total_match_ups</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">match_up</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">total_match_ups</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+                                <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">value</span><span class="p">,</span>
+                                                           <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">round_num</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}{</span><span class="n">match_up</span><span class="si">}{</span><span class="n">game_number</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
+                        <span class="n">total_match_ups</span> <span class="o">=</span> <span class="n">total_match_ups</span> <span class="o">//</span> <span class="mi">2</span>
+                        <span class="n">round_num</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div></div>
+
+<p>The function <strong><em>get_play_by_play_data</em></strong> needs to be called with the download path, seasons and their corresponding
+number of games and the game types for which the data is to be downloaded.
+<br />
+<br />
+Here is an example of how this function can be called:</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">make_dataset</span> <span class="kn">import</span> <span class="n">Gametype</span><span class="p">,</span> <span class="n">scrape_nhl_data</span>
+
+<span class="n">scraper</span> <span class="o">=</span> <span class="n">scrape_nhl_data</span><span class="p">()</span>
+<span class="n">season_data</span> <span class="o">=</span> <span class="p">{</span><span class="s">'2016'</span><span class="p">:</span> <span class="mi">1230</span><span class="p">,</span> <span class="s">'2017'</span><span class="p">:</span> <span class="mi">1271</span><span class="p">,</span> <span class="s">'2018'</span><span class="p">:</span> <span class="mi">1271</span><span class="p">,</span><span class="s">'2019'</span><span class="p">:</span> <span class="mi">1271</span><span class="p">,</span><span class="s">'2020'</span><span class="p">:</span> <span class="mi">868</span><span class="p">}</span>
+<span class="n">game_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">name</span><span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">scraper</span><span class="p">.</span><span class="n">get_play_by_play_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s">''</span><span class="p">,</span> <span class="n">seasons_to_game_volume_map</span><span class="o">=</span><span class="n">season_data</span><span class="p">,</span><span class="n">game_types</span><span class="o">=</span><span class="n">game_types</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="question-2">Question 2</h2>
+
+<p>…content…</p>
+
+</div>
+
+
+<div class="related">
+  <h2>Related posts</h2>
+  <ul class="related-posts">
+    
+      <li>
+        <h3>
+          <a href="/2021/09/17/ift6758-demo/">
+            IFT6758 Demo Post
+            <small>17 Sep 2021</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/04/03/introducing-lanyon/">
+            Introducing Lanyon
+            <small>03 Apr 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+      <li>
+        <h3>
+          <a href="/2020/04/02/example-content/">
+            Example content
+            <small>02 Apr 2020</small>
+          </a>
+        </h3>
+      </li>
+    
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+
+    <label for="sidebar-checkbox" class="sidebar-toggle"></label>
+
+    <script src='/public/js/script.js'></script>
+  </body>
+</html>
