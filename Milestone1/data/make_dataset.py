@@ -1,7 +1,5 @@
 import os
 import json
-from typing import Union
-from typing import SupportsIndex
 
 import requests as req
 import time
@@ -18,7 +16,7 @@ class scrape_nhl_data:
     def get_game_id(self, season: str, game_type: str, game_number: str):
         return f'{season}{game_type}{str(game_number).zfill(4)}'
 
-    def write_data(self, loc: str, season: str, content: Union[SupportsIndex, slice]):
+    def write_data(self, loc: str, season: str, content):
         if season != Gametype.REGULAR.name and 'endDateTime' not in content['gameData']['datetime']:
             return
         with open(f'{loc}.json', 'w+', encoding='utf-8') as f:
