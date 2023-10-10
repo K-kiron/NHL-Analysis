@@ -79,4 +79,4 @@ def tidy_data(path, year, season, game_id):
     return pd.DataFrame(shot_data_temp)
 
 #test case below
-#print(tidy_data(2017, 'regular', 2017020001))
+#print(tidy_data("/Users/yaldakasravi/Downloads/datascience/IFT6758_Data",2017, 'regular',2017020001))
