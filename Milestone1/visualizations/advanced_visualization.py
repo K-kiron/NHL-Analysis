@@ -12,11 +12,11 @@ import plotly.graph_objects as go
 from PIL import Image
 import plotly.express as px
 #from dash import Dash, dcc, html
-sys.path.append("/Users/yaldakasravi/IFT6758B-Project-B10/Milestone1/features")
+sys.path.append("IFT6758B-Project-B10/Milestone1/features")
 
 from tidy_data import tidy_data
 def load_tidy_data(year, season):
-    path = f"/Users/yaldakasravi/IFT6758B-Project-B10/Milestone1/data/IFT6758_Data"
+    path = f"IFT6758B-Project-B10/Milestone1/data/IFT6758_Data"
 
     # Define game_type based on season
     game_type = '02' if season.lower() == 'regular' else '03'
@@ -48,7 +48,7 @@ def load_tidy_data(year, season):
 
 # Function to load the rink image
 def load_rink_image(image_path):
-    return Image.open("/Users/yaldakasravi/IFT6758B-Project-B10/Milestone1/visualizations/nhl_rink.png")
+    return Image.open("IFT6758B-Project-B10/Milestone1/visualizations/nhl_rink.png")
 
 # Define offensive zone coordinates (adjust these based on your specific rink dimensions)
 offensive_zone_x_min = 0
@@ -162,7 +162,7 @@ if __name__ == "__main__":
         selected_team = input(f"Select a team from the following: {', '.join(unique_teams)}: ")
 
         # Load the rink image
-        rink_image_path = "/Users/yaldakasravi/IFT6758B-Project-B10/Milestone1/visualizations/nhl_rink.png"
+        rink_image_path = "IFT6758B-Project-B10/Milestone1/visualizations/nhl_rink.png"
         rink_image = load_rink_image(rink_image_path)
 
         # Create the shot map for the selected team
