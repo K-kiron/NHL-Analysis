@@ -67,9 +67,9 @@ class scrape_nhl_data:
             # Loop inside a particular game type i.e. regular or playoffs
             for game_type in game_types:
                 if len(path.strip()) == 0:
-                    loc = f'{season}/{game_type}'
+                    loc = f'IFT6758_Data/{season}/{game_type}'
                 else:
-                    loc = f'{path}/{season}/{game_type}'
+                    loc = f'{path}/IFT6758_Data/{season}/{game_type}'
 
                 if not os.path.exists(loc):
                     os.makedirs(loc)
