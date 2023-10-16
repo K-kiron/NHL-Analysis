@@ -40,7 +40,8 @@ class scrape_nhl_data:
                               seasons_to_game_volume_map: dict,
                               game_types: list
                               ):
-        """Created folders and individual json files for
+        """Creates folders for each game type in a season and stores the play-by-play data for
+        each game in a json file
                 Arguments:
                     path (str): Location where the files should be created.
                     Ideally it should be the 'data' folder of our repository.
@@ -52,7 +53,7 @@ class scrape_nhl_data:
                     seasons_to_game_volume_map (dict of str: int): Map of seasons
                     for which the data is required and the corresponding number of
                     games in that season. For e.g. it will have the key as '2016'
-                    for the 2016-17 season.
+                    for the 2016-17 season and 1230 as the corresponding number of games.
 
                     game_types (dict of str: str): List of game types for which
                     data needs to be retrieved.
@@ -100,3 +101,9 @@ class scrape_nhl_data:
                                 self.scrape_data(game_id, Gametype.PLAYOFFS.name, loc)
                         total_match_ups = total_match_ups // 2
                         round_num += 1
+
+if __name__ == "__main__":
+    scraper = scrape_nhl_data()
+    season_data = {'2016': 1230, '2017': 1271, '2018': 1271, '2019': 1271, '2020': 868}
+    game_types = [Gametype.REGULAR.name, Gametype.PLAYOFFS.name]
+    scraper.get_play_by_play_data(path='', seasons_to_game_volume_map=season_data, game_types=game_types)
