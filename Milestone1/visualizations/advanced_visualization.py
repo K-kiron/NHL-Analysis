@@ -15,11 +15,11 @@ import plotly.offline as pyo
 import pdb
 #from dash import Dash, dcc, html
 
-sys.path.append("/Users/yaldakasravi/Desktop/IFT6758B-Project-B10/Milestone1/features")
+sys.path.append("~/IFT6758B-Project-B10/Milestone1/features")
 
 from tidy_data import tidy_data
 def load_tidy_data(year, season):
-    path = f"/Users/yaldakasravi/Desktop/IFT6758B-Project-B10/Milestone1/data/IFT6758_Data"
+    path = f"~/IFT6758B-Project-B10/Milestone1/data/IFT6758_Data"
 
     # Define game_type based on season
     game_type = '02' if season.lower() == 'regular' else '03'
@@ -51,7 +51,7 @@ def load_tidy_data(year, season):
 
 # Function to load the rink image
 def load_rink_image(image_path):
-    return Image.open("/Users/yaldakasravi/IFT6758B-Project-B10/Milestone1/visualizations/nhl_rink.png")
+    return Image.open("./nhl_rink.png")
 
 # Define offensive zone coordinates (adjust these based on your specific rink dimensions)
 offensive_zone_x_min = 0
