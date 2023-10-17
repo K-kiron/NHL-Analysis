@@ -15,11 +15,11 @@ import plotly.offline as pyo
 import pdb
 #from dash import Dash, dcc, html
 
-sys.path.append("~/IFT6758B-Project-B10/Milestone1/features")
+sys.path.append("/Users/yaldakasravi/Desktop/IFT6758B-Project-B10/Milestone1/features")
 
 from tidy_data import tidy_data
 def load_tidy_data(year, season):
-    path = f"~/IFT6758B-Project-B10/Milestone1/data/IFT6758_Data"
+    path = f"/Users/yaldakasravi/Desktop/IFT6758B-Project-B10/Milestone1/data/IFT6758_Data"
 
     # Define game_type based on season
     game_type = '02' if season.lower() == 'regular' else '03'
@@ -51,7 +51,7 @@ def load_tidy_data(year, season):
 
 # Function to load the rink image
 def load_rink_image(image_path):
-    return Image.open("./nhl_rink.png")
+    return Image.open("/Users/yaldakasravi/IFT6758B-Project-B10/Milestone1/visualizations/nhl_rink.png")
 
 # Define offensive zone coordinates (adjust these based on your specific rink dimensions)
 offensive_zone_x_min = 0
@@ -143,6 +143,7 @@ def create_shot_map_for_team(data, rink_image, selected_team,team_average,year):
     #hist_1d = diff_hist.reshape(-1)
     hist_1d = diff_hist.reshape(-1)
 
+
 # Create a dataframe from the values
     data_df = pd.DataFrame({'x': np.repeat(x_values, len(y_values)),
                         'y': np.tile(y_values, len(x_values)),
@@ -183,7 +184,6 @@ def create_shot_map_for_team(data, rink_image, selected_team,team_average,year):
     fig.show()
 
     
-    fig = px.density_heatmap(data_df)
     #fig = px.density_mapbox(df,lat=0,lon=1,z=2  )
     #    height=900,
     #    autosize=False,
