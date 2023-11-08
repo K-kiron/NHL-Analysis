@@ -11,18 +11,9 @@ from sklearn.metrics import roc_curve, auc
 import os
 import sys
 
-DATA_PATH = '../../IFT6758_Data/'
-PROJECT_PATH = '../../Milestone2/'
-
-sys.path.append(PROJECT_PATH)
-from features.tidy_data import tidy_data
-
-from visualizations.simple_visualization import *
-
-from features.feature_eng1 import *
 
 # Read in data and assign X and y
-data = pd.read_csv('/IFT6758B-Project-B10/Milestone2/features/train_data.csv', index_col=0)
+data = pd.read_csv('../features/train_data.csv', index_col=0)
 X = data[['shot_distance', 'shot_angle' ]]
 X = X.rename({'shot_distance': 'distanceFromNet', 'shot_angle': 'angleFromNet'}, axis=1)
 X.interpolate(method='linear', inplace=True)
@@ -95,7 +86,7 @@ def plot_ROC(y_val,probs,title = False, savename=False):
     ax.set_facecolor('0.95')
     plt.tight_layout()
     if savename:
-        plt.savefig(f'{savename}.png')
+        plt.savefig(f'{plot_ROC}.png')
     plt.show()
     plt.clf()
 
