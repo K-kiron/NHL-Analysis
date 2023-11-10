@@ -5,61 +5,89 @@ import pandas as pd
 import numpy as np
 import math
 
-
-def feature_eng2(df):
-    df_eng2 = df
-    df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
-    df_eng2['gameSeconds'] = df['period']*(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
-    df_eng2 = df_eng2.drop(columns=['minutes', 'seconds'])
-
-    df_copy = df
-    new_df = df_copy.shift(fill_value=np.nan)
-    new_df.columns = df.columns
-
-    new_df.iloc[0, :] = np.nan
-    new_df.iloc[:, 0] = np.nan
-
-    df_copy = new_df
-    df_eng2['LastEventType'] = df_copy['eventType']
-    df_eng2['Last_x_coordinate'] = df_copy['x_coordinate']
-    df_eng2['Last_y_coordinate'] = df_copy['y_coordinate']
-    df_eng2['Last_gameSeconds'] = df_copy['gameSeconds']
-    df_eng2['Last_period'] = df_copy['period']
-    df_eng2['DistanceLastEvent'] = np.sqrt((df_eng2['Last_x_coordinate']-df_eng2['x_coordinate'])**2+(df_eng2['Last_y_coordinate']-df_eng2['y_coordinate'])**2)
-    df_eng2['Rebound'] = df_eng2['LastEventType'] == 'Shot'
-    df_eng2['LastShotAngle'] = df_copy['shotAngle']
-    df_eng2['changeShotAngle'] = df_eng2['LastShotAngle']+df_eng2['shotAngle']
-    df_eng2['timeFromLastEvent'] = df_eng2['gameSeconds']-df_eng2['Last_gameSeconds']
-    df_eng2['speed'] = df_eng2['DistanceLastEvent']/df_eng2['timeFromLastEvent']
+def tidy_data(path, year, season, game_id):
+    with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
+        game_data = json.load(file)
     
-    return df_eng2
-
-def feature_eng2_cleaned(df):
-    df_eng2 = df
-    df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
-    df_eng2['gameSeconds'] = df['period']*(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
-    df_eng2 = df_eng2.drop(columns=['minutes', 'seconds'])
+    shot_data_temp = []
     
+    playData = game_data['liveData']['plays']['allPlays']
+    homeTeam = game_data['gameData']['teams']['home']['triCode']
+    awayTeam = game_data['gameData']['teams']['away']['triCode']
+    for i in range(len(playData)):
+        eventData = playData[i]
+        if eventData['result']['event'] == 'Shot' or eventData['result']['event'] == 'Goal':
+            game_id = game_data['gameData']['game']['pk']
+            periodType = eventData['about']['periodType']
+            period = eventData['about']['period']
+            periodTime = eventData['about']['periodTime']
+            team = eventData['team']['triCode']
+            eventType = eventData['result']['event']
+            try:
+                x_coordinate = eventData['coordinates']['x']
+                y_coordinate = eventData['coordinates']['y']
+            except KeyError:
+                x_coordinate = None
+                y_coordinate = None
+            shooter = eventData['players'][0]['player']['fullName']
+            goalie = eventData['players'][-1]['player']['fullName']
+            try:
+                shotType = eventData['result']['secondaryType']
+            except KeyError:
+                shotType = None
+            if eventType == 'Goal':
+                try:
+                    emptyNet = eventData['result']['emptyNet']
+                except KeyError:
+                    emptyNet = None
+                strength = eventData['result']['strength']['code']
+            else:
+                emptyNet = None
+                strength = None
+                
+            if team == homeTeam:
+                if period%2 != 0:
+                    goalLocation = 'Left'
+                else:
+                    goalLocation = 'Right'
+                    
+            elif team == awayTeam:
+                if period%2 != 0:
+                    goalLocation = 'Right'
+                else:
+                    goalLocation = 'Left'
+                    
+            if goalLocation == 'Left':
+                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
+            elif goalLocation == 'Right':
+                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate - 89)))
+                
+            if goalLocation == 'Left':
+                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate + 89)**2)
+            elif goalLocation == 'Right':
+                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate - 89)**2)
+            
+            shot_data = {
+                'game_id': game_id,
+                'homeTeam': homeTeam,
+                'awayTeam': awayTeam,
+                'periodType': periodType,
+                'period': period,
+                'periodTime': periodTime,
+                'team': team,
+                'eventType': eventType,
+                'x_coordinate': x_coordinate,
+                'y_coordinate': y_coordinate,
+                'goal_location': goalLocation,
+                'shooter': shooter,
+                'goalie': goalie,
+                'shotType': shotType,
+                'emptyNet': emptyNet,
+                'strength': strength,
+                'shotAngle': shotangle,
+                'shotDistance': shotDistance
+            }
 
-    df_copy = df
-    new_df = df_copy.shift(fill_value=np.nan)
-    new_df.columns = df.columns
-
-    new_df.iloc[0, :] = np.nan
-    new_df.iloc[:, 0] = np.nan
-
-    df_copy = new_df
-    df_eng2['LastEventType'] = df_copy['eventType']
-    df_eng2['Last_x_coordinate'] = df_copy['x_coordinate']
-    df_eng2['Last_y_coordinate'] = df_copy['y_coordinate']
-    df_eng2['Last_gameSeconds'] = df_copy['gameSeconds']
-    df_eng2['Last_period'] = df_copy['period']
-    df_eng2['DistanceLastEvent'] = np.sqrt((df_eng2['Last_x_coordinate']-df_eng2['x_coordinate'])**2+(df_eng2['Last_y_coordinate']-df_eng2['y_coordinate'])**2)
-    df_eng2['Rebound'] = df_eng2['LastEventType'] == 'Shot'
-    df_eng2['LastShotAngle'] = df_copy['shotAngle']
-    df_eng2['changeShotAngle'] = df_eng2['LastShotAngle']+df_eng2['shotAngle']
-    df_eng2['timeFromLastEvent'] = df_eng2['gameSeconds']-df_eng2['Last_gameSeconds']
-    df_eng2['speed'] = df_eng2['DistanceLastEvent']/df_eng2['timeFromLastEvent']
-    
-    return df_eng2[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed']]
-
+            shot_data_temp.append(shot_data)
+            
+    return pd.DataFrame(shot_data_temp)
