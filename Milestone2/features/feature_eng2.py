@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import math
 
-
 def feature_eng2(df):
     df_eng2 = df
     df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
