@@ -46,18 +46,22 @@ def generate_train_set(DATA_PATH):
     train_df = year_integration(DATA_PATH, 2016)
     train_df = pd.concat([train_df, year_integration(DATA_PATH, 2017)], ignore_index=True)
     train_df = pd.concat([train_df, year_integration(DATA_PATH, 2018)], ignore_index=True)
+    train_df = pd.concat([train_df, year_integration(DATA_PATH, 2019)], ignore_index=True)
 
     train_df['shot_angle'] = train_df.apply(calculate_shot_angle, axis=1)
     train_df['shot_distance'] = train_df.apply(calculate_shot_distance, axis=1)
     train_df['emptyNet'] = train_df.apply(standardize_emptyNet, axis=1)
     train_df['is_goal'] = train_df.apply(is_goal, axis=1)
 
+    # shuffle the dataframe
+    train_df = train_df.sample(frac=1).reset_index(drop=True)
+
     return train_df
 
 
 
 def init_distance_bins(df):
-    max_distance = np.sqrt((89*2)**2 + 0**2)
+    max_distance = df['shot_distance'].max()
     min_distance = 0
 
     # divide the distance into 20 bins
@@ -81,35 +85,42 @@ def init_angle_bins(df):
 
 
 def bin_by_distance(df):
-
-    df = init_distance_bins(df)
     
-    df = df[df['is_goal'] == 1]
-    df_goal_count = df.groupby(['distance_bin']).count()['is_goal']
+    df_goal = df[df['is_goal'] == 1]
+    df_no_goal = df[df['is_goal'] == 0]
 
-    plt.figure(figsize=(8, 5))
-    df_goal_count.plot(kind='bar', x='distance_bin', y='is_goal')
+    plt.figure(figsize=(16, 5))
+    plt.subplot(1, 2, 1)
+    plt.hist(df_goal['shot_distance'], bins=20)
     plt.xlabel('Distance from the gate')
     plt.ylabel('Number of goals')
     plt.title('Number of goals by distance')
+    plt.subplot(1, 2, 2)
+    plt.hist(df_no_goal['shot_distance'], bins=20)
+    plt.xlabel('Distance from the gate')
+    plt.ylabel('Number of no-goals')
+    plt.title('Number of no-goals by distance')
     plt.show()
 
 
 
 def bin_by_angle(df):
-    
-    df = init_angle_bins(df)
         
-    df = df[df['is_goal'] == 1]
-    df_goal_count = df.groupby(['angle_bin']).count()['is_goal']
+    df_goal = df[df['is_goal'] == 1]
+    df_no_goal = df[df['is_goal'] == 0]
     
-    plt.figure(figsize=(8, 5))
-    df_goal_count.plot(kind='bar', x='angle_bin', y='is_goal')
+    plt.figure(figsize=(16, 5))
+    plt.subplot(1, 2, 1)
+    plt.hist(df_goal['shot_angle'], bins=20)
     plt.xlabel('Shot angle')
     plt.ylabel('Number of goals')
     plt.title('Number of goals by angle')
+    plt.subplot(1, 2, 2)
+    plt.hist(df_no_goal['shot_angle'], bins=20)
+    plt.xlabel('Shot angle')
+    plt.ylabel('Number of no-goals')
+    plt.title('Number of no-goals by angle')
     plt.show()
-
 
 
 def joint_plot(df):
@@ -133,8 +144,8 @@ def prob_by_distance(df):
     plt.figure(figsize=(8, 5))
     df_goal_prob.plot(kind='bar', x='distance_bin', y='is_goal')
     plt.xlabel('Distance from the gate')
-    plt.ylabel('Probability of goal')
-    plt.title('Probability of goal by distance')
+    plt.ylabel('Goal rate')
+    plt.title('Goal rate by distance')
     plt.show()
 
 
@@ -151,32 +162,49 @@ def prob_by_angle(df):
     plt.figure(figsize=(8, 5))
     df_goal_prob.plot(kind='bar', x='angle_bin', y='is_goal')
     plt.xlabel('Shot angle')
-    plt.ylabel('Probability of goal')
-    plt.title('Probability of goal by angle')
+    plt.ylabel('Goal rate')
+    plt.title('Goal rate by angle')
     plt.show()
 
 
 
 def check_emptyNet(df):
 
-    df = init_distance_bins(df)
+    # df = init_distance_bins(df)
 
     df_goal = df[df['is_goal'] == 1]
+    df_no_goal = df[df['is_goal'] == 0]
+    # display(df_no_goal)
     df_emptyNet = df_goal[df_goal['emptyNet'] == 1]
+    df_emptyNet_no = df_no_goal[df_no_goal['emptyNet'] == 1]
+    # display(df_emptyNet_no)
     df_not_emptyNet = df_goal[df_goal['emptyNet'] == 0]
+    df_not_emptyNet_no = df_no_goal[df_no_goal['emptyNet'] == 0]
 
-    df_emptyNet_count = df_emptyNet.groupby(['distance_bin']).count()['is_goal']
-    df_not_emptyNet_count = df_not_emptyNet.groupby(['distance_bin']).count()['is_goal']
+    # df_emptyNet_count = df_emptyNet.groupby(['distance_bin']).count()['is_goal']
+    # df_not_emptyNet_count = df_not_emptyNet.groupby(['distance_bin']).count()['is_goal']
 
     plt.figure(figsize=(16, 5))
     plt.subplot(1, 2, 1)
-    df_emptyNet_count.plot(kind='bar', x='distance_bin', y='is_goal')
+    plt.hist(df_emptyNet['shot_distance'], bins=20)
     plt.xlabel('Distance from the gate')
     plt.ylabel('Number of goals')
     plt.title('Number of goals by distance (empty net)')
     plt.subplot(1, 2, 2)
-    df_not_emptyNet_count.plot(kind='bar', x='distance_bin', y='is_goal')
+    plt.hist(df_emptyNet_no['shot_distance'], bins=20)
+    plt.xlabel('Distance from the gate')
+    plt.ylabel('Number of no-goals')
+    plt.title('Number of no-goals by distance (empty net)')
+
+    plt.figure(figsize=(16, 5))
+    plt.subplot(1, 2, 1)
+    plt.hist(df_not_emptyNet['shot_distance'], bins=20)
     plt.xlabel('Distance from the gate')
     plt.ylabel('Number of goals')
     plt.title('Number of goals by distance (non-empty net)')
+    plt.subplot(1, 2, 2)
+    plt.hist(df_not_emptyNet_no['shot_distance'], bins=20)
+    plt.xlabel('Distance from the gate')
+    plt.ylabel('Number of no-goals')
+    plt.title('Number of no-goals by distance (non-empty net)')
     plt.show()
