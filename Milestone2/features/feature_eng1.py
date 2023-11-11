@@ -92,8 +92,8 @@ def bin_by_distance(df):
     df_no_goal = df[df['is_goal'] == 0]
 
     plt.figure(figsize=(8, 5))
-    plt.hist(df_goal['shot_distance'], bins=bins, alpha=0.5, label='goal', edgecolor='black', linewidth=1.2)
     plt.hist(df_no_goal['shot_distance'], bins=bins, alpha=0.5, label='no-goal', edgecolor='black', linewidth=1.2)
+    plt.hist(df_goal['shot_distance'], bins=bins, alpha=0.5, label='goal', edgecolor='black', linewidth=1.2)
     plt.xlabel('Distance from the gate')
     plt.ylabel('Shot counts')
     plt.title('Shot counts by distance')
@@ -110,8 +110,8 @@ def bin_by_angle(df):
     df_no_goal = df[df['is_goal'] == 0]
     
     plt.figure(figsize=(8, 5))
-    plt.hist(df_goal['shot_angle'], bins=bins, alpha=0.5, label='goal', edgecolor='black', linewidth=1.2)
     plt.hist(df_no_goal['shot_angle'], bins=bins, alpha=0.5, label='no-goal', edgecolor='black', linewidth=1.2)
+    plt.hist(df_goal['shot_angle'], bins=bins, alpha=0.5, label='goal', edgecolor='black', linewidth=1.2)
     plt.xlabel('Shot angle')
     plt.ylabel('Shot counts')
     plt.title('Shot counts by angle')
@@ -173,8 +173,8 @@ def check_emptyNet(df):
     df_not_emptyNet = df_goal[df_goal['emptyNet'] == 0]
 
     plt.figure(figsize=(8, 5))
-    plt.hist(df_emptyNet['shot_distance'], bins=bins, alpha=0.5, label='empty net', edgecolor='black', linewidth=1.2)
     plt.hist(df_not_emptyNet['shot_distance'], bins=bins, alpha=0.5, label='non-empty net', edgecolor='black', linewidth=1.2)
+    plt.hist(df_emptyNet['shot_distance'], bins=bins, alpha=0.5, label='empty net', edgecolor='black', linewidth=1.2)
     plt.xlabel('Distance from the gate')
     plt.ylabel('Shot counts')
     plt.title('Shot counts by distance')
