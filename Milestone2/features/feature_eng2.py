@@ -36,7 +36,7 @@ def feature_eng2(df):
 def feature_eng2_cleaned(df):
     df_eng2 = df
     df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
-    df_eng2['gameSeconds'] = df['period']*(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
+    df_eng2['gameSeconds'] = (df['period']-1)*20*60+(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
     df_eng2 = df_eng2.drop(columns=['minutes', 'seconds'])
     
 
