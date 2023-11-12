@@ -51,10 +51,10 @@ def power_play(df, select_period):
     
     timer = np.zeros(TotalT)
     timer_away = np.zeros(TotalT)
-    players_away = 6*np.ones(TotalT)
+    players_away = 5*np.ones(TotalT)
 
     timer_home = np.zeros(TotalT)
-    players_home = 6*np.ones(TotalT)
+    players_home = 5*np.ones(TotalT)
 
     time_elapsed = 0
     period_count = 0
