@@ -57,14 +57,14 @@ def tidy_data(path, year, season, game_id):
                 else:
                     goalLocation = 'Left'
                     
-            if goalLocation == 'Left':
+            if goalLocation == 'Left' and y_coordinate is not None:
                 shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
-            elif goalLocation == 'Right':
+            elif goalLocation == 'Right' and y_coordinate is not None:
                 shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate - 89)))
                 
-            if goalLocation == 'Left':
+            if goalLocation == 'Left' and y_coordinate is not None:
                 shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate + 89)**2)
-            elif goalLocation == 'Right':
+            elif goalLocation == 'Right' and y_coordinate is not None:
                 shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate - 89)**2)
             
             shot_data = {
