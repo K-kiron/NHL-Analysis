@@ -31,7 +31,7 @@ def power_play(df, select_period):
         select_period (int): period for which the outputs are returned
 
     Returns:
-        binary2cumulative(timer_home): array where the entry is the time since the power play started for penalties
+        binary2cumulative(timer): array where the entry is the time since the power play started for penalties
                                         given to ALL teams combined, where the index is the time in seconds
         binary2cumulative(timer_home): array where the entry is the time since the power play started for penalties
                                         given to the home team, where the index is the time in seconds
