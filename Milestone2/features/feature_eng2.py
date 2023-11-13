@@ -83,9 +83,16 @@ def power_play(df, select_period):
       
     return binary2cumulative(timer), binary2cumulative(timer_home), binary2cumulative(timer_away), players_home, players_away
 
+def is_goal(df):
+    if df['eventType'] == 'Goal':
+        return 1
+    else:
+        return 0
 
 def feature_eng2_raw(DATA_PATH, year, season, game_id):
     df = tidy_data(DATA_PATH, year, season, game_id)
+    if len(df) == 0:
+        return
     df_eng2 = df
     df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
     df_eng2['gameSeconds'] = df['period']*(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
@@ -127,6 +134,7 @@ def feature_eng2_raw(DATA_PATH, year, season, game_id):
     df_eng2['time_since_pp'] = time_since_pp
     df_eng2['no_players_home'] = no_players_home
     df_eng2['no_players_away'] = no_players_away
+    df_eng2['is_goal'] = df_eng2.apply(is_goal, axis=1)
     
     
     return df_eng2
@@ -159,4 +167,15 @@ def feature_eng2_cleaned(path, year) -> pd.DataFrame:
     for season in ['regular', 'playoffs']:
         season_df = season_integration_eng2(path, year, season)
         df = pd.concat([df, season_df], ignore_index=True)
-    return df[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away']]
+    return df[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away', 'is_goal']]
+
+def get_train_data(DATA_PATH):
+    data = feature_eng2_cleaned(DATA_PATH, 2016)
+    data = pd.concat([data, feature_eng2_cleaned(DATA_PATH, 2017)], ignore_index=True)
+    data = pd.concat([data, feature_eng2_cleaned(DATA_PATH, 2018)], ignore_index=True)
+    data = pd.concat([data, feature_eng2_cleaned(DATA_PATH, 2019)], ignore_index=True)
+
+    data.to_csv(DATA_PATH + '/train_data.csv')
+
+if __name__ == "__main__":
+    get_train_data('../../IFT6758_Data')
