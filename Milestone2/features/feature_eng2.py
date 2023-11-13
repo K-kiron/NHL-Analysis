@@ -118,9 +118,11 @@ def feature_eng2(DATA_PATH, year, season, game_id):
     no_players_away = np.array([[]])
     for select_period in range(min(period_lst),max(period_lst)+1):
         selected_idx = np.where(np.array(period_lst) == select_period)
-        time_since_pp = np.concatenate((time_since_pp, np.array(power_play(dfg, select_period)[0])[selected_idx]), axis=None)
-        no_players_home = np.concatenate((no_players_home, np.array(power_play(dfg, select_period)[3])[selected_idx]), axis=None)
-        no_players_away = np.concatenate((no_players_away, np.array(power_play(dfg, select_period)[4])[selected_idx]), axis=None)
+        selected_times = df_eng2['gameSeconds'].iloc[selected_idx]
+        selected_times = np.array(selected_times%(60*20))
+        time_since_pp = np.concatenate((time_since_pp, np.array(power_play(dfg, select_period)[0])[selected_times]), axis=None)
+        no_players_home = np.concatenate((no_players_home, np.array(power_play(dfg, select_period)[3])[selected_times]), axis=None)
+        no_players_away = np.concatenate((no_players_away, np.array(power_play(dfg, select_period)[4])[selected_times]), axis=None)
 
     df_eng2['time_since_pp'] = time_since_pp
     df_eng2['no_players_home'] = no_players_home
@@ -163,9 +165,11 @@ def feature_eng2_cleaned(df):
     no_players_away = np.array([[]])
     for select_period in range(min(period_lst),max(period_lst)+1):
         selected_idx = np.where(np.array(period_lst) == select_period)
-        time_since_pp = np.concatenate((time_since_pp, np.array(power_play(dfg, select_period)[0])[selected_idx]), axis=None)
-        no_players_home = np.concatenate((no_players_home, np.array(power_play(dfg, select_period)[3])[selected_idx]), axis=None)
-        no_players_away = np.concatenate((no_players_away, np.array(power_play(dfg, select_period)[4])[selected_idx]), axis=None)
+        selected_times = df_eng2['gameSeconds'].iloc[selected_idx]
+        selected_times = np.array(selected_times%(60*20))
+        time_since_pp = np.concatenate((time_since_pp, np.array(power_play(dfg, select_period)[0])[selected_times]), axis=None)
+        no_players_home = np.concatenate((no_players_home, np.array(power_play(dfg, select_period)[3])[selected_times]), axis=None)
+        no_players_away = np.concatenate((no_players_away, np.array(power_play(dfg, select_period)[4])[selected_times]), axis=None)
 
     df_eng2['time_since_pp'] = time_since_pp
     df_eng2['no_players_home'] = no_players_home
