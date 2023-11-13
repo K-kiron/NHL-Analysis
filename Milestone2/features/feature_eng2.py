@@ -3,8 +3,8 @@ import os
 import glob
 import pandas as pd
 import numpy as np
+import re
 from tidy_data import *
-
 
 def game_data(path, year, season, game_id):
     with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
@@ -84,7 +84,7 @@ def power_play(df, select_period):
     return binary2cumulative(timer), binary2cumulative(timer_home), binary2cumulative(timer_away), players_home, players_away
 
 
-def feature_eng2(DATA_PATH, year, season, game_id):
+def feature_eng2_raw(DATA_PATH, year, season, game_id):
     df = tidy_data(DATA_PATH, year, season, game_id)
     df_eng2 = df
     df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
@@ -131,48 +131,32 @@ def feature_eng2(DATA_PATH, year, season, game_id):
     
     return df_eng2
 
-def feature_eng2_cleaned(df):
-    df = tidy_data(DATA_PATH, year, season, game_id)
-    df_eng2 = df
-    df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
-    df_eng2['gameSeconds'] = df['period']*(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
-    df_eng2 = df_eng2.drop(columns=['minutes', 'seconds'])
+json_regex = re.compile(r"(.*)\.json")
 
-    df_copy = df
-    new_df = df_copy.shift(fill_value=np.nan)
-    new_df.columns = df.columns
+def season_integration_eng2(path, year, season) -> pd.DataFrame:
+    df = pd.DataFrame()
+    season_path = os.path.join(path, str(year), season)
+    i = 0
 
-    new_df.iloc[0, :] = np.nan
-    new_df.iloc[:, 0] = np.nan
+    for file_path in os.listdir(season_path):
+        match = re.match(json_regex, file_path)
+        if match:
+            game_id = match.group(1)
+            game_df = feature_eng2_raw(path, year, season, game_id)
+            df = pd.concat([df, game_df], ignore_index=True)
+    return df
 
-    df_copy = new_df
-    df_eng2['LastEventType'] = df_copy['eventType']
-    df_eng2['Last_x_coordinate'] = df_copy['x_coordinate']
-    df_eng2['Last_y_coordinate'] = df_copy['y_coordinate']
-    df_eng2['Last_gameSeconds'] = df_copy['gameSeconds']
-    df_eng2['Last_period'] = df_copy['period']
-    df_eng2['DistanceLastEvent'] = np.sqrt((df_eng2['Last_x_coordinate']-df_eng2['x_coordinate'])**2+(df_eng2['Last_y_coordinate']-df_eng2['y_coordinate'])**2)
-    df_eng2['Rebound'] = df_eng2['LastEventType'] == 'Shot'
-    df_eng2['LastShotAngle'] = df_copy['shotAngle']
-    df_eng2['changeShotAngle'] = df_eng2['LastShotAngle']+df_eng2['shotAngle']
-    df_eng2['timeFromLastEvent'] = df_eng2['gameSeconds']-df_eng2['Last_gameSeconds']
-    df_eng2['speed'] = df_eng2['DistanceLastEvent']/df_eng2['timeFromLastEvent']
-    
-    dfg = game_data(DATA_PATH, year, season, game_id)
-    period_lst = df_eng2['period'].tolist()
-    time_since_pp = np.array([[]])
-    no_players_home = np.array([[]])
-    no_players_away = np.array([[]])
-    for select_period in range(min(period_lst),max(period_lst)+1):
-        selected_idx = np.where(np.array(period_lst) == select_period)
-        selected_times = df_eng2['gameSeconds'].iloc[selected_idx]
-        selected_times = np.array(selected_times%(60*20))
-        time_since_pp = np.concatenate((time_since_pp, np.array(power_play(dfg, select_period)[0])[selected_times]), axis=None)
-        no_players_home = np.concatenate((no_players_home, np.array(power_play(dfg, select_period)[3])[selected_times]), axis=None)
-        no_players_away = np.concatenate((no_players_away, np.array(power_play(dfg, select_period)[4])[selected_times]), axis=None)
 
-    df_eng2['time_since_pp'] = time_since_pp
-    df_eng2['no_players_home'] = no_players_home
-    df_eng2['no_players_away'] = no_players_away
-    
-    return df_eng2[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away']]
+def feature_eng2(path, year) -> pd.DataFrame:
+    df = pd.DataFrame()
+    for season in ['regular', 'playoffs']:
+        season_df = season_integration_eng2(path, year, season)
+        df = pd.concat([df, season_df], ignore_index=True)
+    return df
+
+def feature_eng2_cleaned(path, year) -> pd.DataFrame:
+    df = pd.DataFrame()
+    for season in ['regular', 'playoffs']:
+        season_df = season_integration_eng2(path, year, season)
+        df = pd.concat([df, season_df], ignore_index=True)
+    return df[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away']]
