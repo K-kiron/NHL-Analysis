@@ -48,7 +48,7 @@ def generate_train_set(DATA_PATH):
     train_df = pd.concat([train_df, year_integration(DATA_PATH, 2018)], ignore_index=True)
     train_df = pd.concat([train_df, year_integration(DATA_PATH, 2019)], ignore_index=True)
 
-    train_df['shot_angle'] = train_df.apply(calculate_shot_angle, axis=1)
+    train_df['shotAngle'] = train_df.apply(calculate_shot_angle, axis=1)
     train_df['shot_distance'] = train_df.apply(calculate_shot_distance, axis=1)
     train_df['emptyNet'] = train_df.apply(standardize_emptyNet, axis=1)
     train_df['is_goal'] = train_df.apply(is_goal, axis=1)
@@ -79,7 +79,7 @@ def init_angle_bins(df):
     # divide the distance into 20 bins
     bins = np.linspace(min_angle, max_angle, 20)
         
-    df['angle_bin'] = pd.cut(df['shot_angle'], bins=bins)
+    df['angle_bin'] = pd.cut(df['shotAngle'], bins=bins)
     return df
 
 
@@ -110,8 +110,8 @@ def bin_by_angle(df):
     df_no_goal = df[df['is_goal'] == 0]
     
     plt.figure(figsize=(8, 5))
-    plt.hist(df_no_goal['shot_angle'], bins=bins, alpha=0.5, label='no-goal', edgecolor='black', linewidth=1.2)
-    plt.hist(df_goal['shot_angle'], bins=bins, alpha=0.5, label='goal', edgecolor='black', linewidth=1.2)
+    plt.hist(df_no_goal['shotAngle'], bins=bins, alpha=0.5, label='no-goal', edgecolor='black', linewidth=1.2)
+    plt.hist(df_goal['shotAngle'], bins=bins, alpha=0.5, label='goal', edgecolor='black', linewidth=1.2)
     plt.xlabel('Shot angle')
     plt.ylabel('Shot counts')
     plt.title('Shot counts by angle')
@@ -121,7 +121,7 @@ def bin_by_angle(df):
 
 def joint_plot(df):
     plt.figure(figsize=(8, 5))
-    sns.jointplot(x='shot_distance', y='shot_angle', data=df, kind='hist', bins=20)
+    sns.jointplot(x='shot_distance', y='shotAngle', data=df, kind='hist', bins=20)
     plt.xlabel('Distance from the gate')
     plt.ylabel('Shot angle')
     plt.show()

@@ -2,6 +2,8 @@ import json
 import os
 import glob
 import pandas as pd
+import numpy as np
+import math
 
 def tidy_data(path, year, season, game_id):
     with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
@@ -54,7 +56,17 @@ def tidy_data(path, year, season, game_id):
                     goalLocation = 'Right'
                 else:
                     goalLocation = 'Left'
-
+                    
+            if goalLocation == 'Left' and y_coordinate is not None:
+                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
+            elif goalLocation == 'Right' and y_coordinate is not None:
+                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate - 89)))
+                
+            if goalLocation == 'Left' and y_coordinate is not None:
+                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate + 89)**2)
+            elif goalLocation == 'Right' and y_coordinate is not None:
+                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate - 89)**2)
+            
             shot_data = {
                 'game_id': game_id,
                 'homeTeam': homeTeam,
@@ -71,12 +83,11 @@ def tidy_data(path, year, season, game_id):
                 'goalie': goalie,
                 'shotType': shotType,
                 'emptyNet': emptyNet,
-                'strength': strength
+                'strength': strength,
+                'shotAngle': shotangle,
+                'shotDistance': shotDistance
             }
 
             shot_data_temp.append(shot_data)
             
     return pd.DataFrame(shot_data_temp)
-
-#test case below
-#print(tidy_data(2017, 'regular', 2017020001))
