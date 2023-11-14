@@ -175,7 +175,42 @@ def get_train_data(DATA_PATH):
     data = pd.concat([data, feature_eng2_cleaned(DATA_PATH, 2018)], ignore_index=True)
     data = pd.concat([data, feature_eng2_cleaned(DATA_PATH, 2019)], ignore_index=True)
 
-    data.to_csv(DATA_PATH + '/train_data.csv')
+    data.to_csv(DATA_PATH + '/clean_train_data.csv')
+
+def get_test_data(DATA_PATH):
+    data = feature_eng2_cleaned(DATA_PATH, 2020)
+
+    data.to_csv(DATA_PATH + '/clean_test_data.csv')
+
+def get_full_test_data(DATA_PATH):
+    data = feature_eng2(DATA_PATH, 2020)
+
+    data.to_csv(DATA_PATH + '/full_test_data.csv')
+
+def get_full_train_data(DATA_PATH):
+    data = feature_eng2(DATA_PATH, 2016)
+    data = pd.concat([data, feature_eng2(DATA_PATH, 2017)], ignore_index=True)
+    data = pd.concat([data, feature_eng2(DATA_PATH, 2018)], ignore_index=True)
+    data = pd.concat([data, feature_eng2(DATA_PATH, 2019)], ignore_index=True)
+
+    data.to_csv(DATA_PATH + '/full_train_data.csv')
 
 if __name__ == "__main__":
-    get_train_data('../../IFT6758_Data')
+    dataset = input('Enter train for parsing train data and test for parsing test data: ')
+    subset_or_full = input('Enter subset for only feature engineering 2 data and full for all data: ')
+
+    dataset = dataset.strip()
+    subset_or_full = subset_or_full.strip()
+    assert dataset in ['train', 'test']
+    assert subset_or_full in ['subset', 'full']
+
+    if dataset == 'train':
+        if subset_or_full == 'subset':
+            get_train_data('../../IFT6758_Data')
+        else:
+            get_full_train_data('../../IFT6758_Data')
+    else:
+        if subset_or_full == 'subset':
+            get_test_data('../../IFT6758_Data')
+        else:
+            get_full_test_data('../../IFT6758_Data')
