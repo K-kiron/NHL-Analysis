@@ -4,7 +4,16 @@ import glob
 import pandas as pd
 import numpy as np
 import re
-from tidy_data import *
+import sys
+
+DATA_PATH = '../../IFT6758_Data/'
+PROJECT_PATH = '../../Milestone2/'
+
+#DATA_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/Milestone_1/data"
+#PROJECT_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/"
+
+sys.path.append(PROJECT_PATH)
+from features.tidy_data import tidy_data
 
 def game_data(path, year, season, game_id):
     with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
