@@ -15,7 +15,12 @@ from visualizations.simple_visualization import *
 
 
 
-def calculate_shot_angle(df):
+def calculate_shot_angle(df: pd.DataFrame) -> float:
+    """
+    Calculate the angle of the shot from the goal post
+
+    Return the angle of the shot
+    """
     if df['goal_location'] == 'Left':
         # calculate angle to (-89, 0)
         return np.degrees(np.arctan2(np.abs(df['y_coordinate']), np.abs(df['x_coordinate'] + 89)))
@@ -25,7 +30,12 @@ def calculate_shot_angle(df):
     
 
     
-def standardize_emptyNet(df):
+def standardize_emptyNet(df: pd.DataFrame) -> int:
+    """
+    Standardize the emptyNet column
+
+    Return 1 if the shot is an empty net, 0 otherwise
+    """
     if df['emptyNet'] == True:
         return 1
     else:
@@ -33,15 +43,25 @@ def standardize_emptyNet(df):
     
 
     
-def is_goal(df):
+def is_goal(df: pd.DataFrame) -> int:
+    """
+    Standardize the is_goal column
+
+    Return 1 if the shot is a goal, 0 otherwise
+    """
     if df['eventType'] == 'Goal':
         return 1
     else:
         return 0
     
 
-    
-def generate_train_set(DATA_PATH):
+
+def generate_train_set(DATA_PATH) -> pd.DataFrame:
+    """
+    Generate the training set(2016-2019) from the raw data
+
+    Return the training set as a DataFrame
+    """
 
     train_df = year_integration(DATA_PATH, 2016)
     train_df = pd.concat([train_df, year_integration(DATA_PATH, 2017)], ignore_index=True)
@@ -60,7 +80,13 @@ def generate_train_set(DATA_PATH):
 
 
 
-def init_distance_bins(df):
+
+def init_distance_bins(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Initialize the distance bins
+
+    Return the dataframe with distance bins
+    """
     max_distance = df['shot_distance'].max()
     min_distance = 0
 
@@ -72,7 +98,12 @@ def init_distance_bins(df):
 
 
 
-def init_angle_bins(df):
+def init_angle_bins(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Initialize the angle bins
+
+    Return the dataframe with angle bins
+    """
     max_angle = 90
     min_angle = 0
 
@@ -84,7 +115,10 @@ def init_angle_bins(df):
 
 
 
-def bin_by_distance(df):
+def bin_by_distance(df: pd.DataFrame):
+    """
+    plot the histogram of shot counts by distance
+    """
 
     bins = np.linspace(0, df['shot_distance'].max(), 20)
     
@@ -102,7 +136,10 @@ def bin_by_distance(df):
 
 
 
-def bin_by_angle(df):
+def bin_by_angle(df: pd.DataFrame):
+    """
+    plot the histogram of shot counts by angle
+    """
 
     bins = np.linspace(0, 90, 20)
         
@@ -119,7 +156,10 @@ def bin_by_angle(df):
     plt.show()
 
 
-def joint_plot(df):
+def joint_plot(df: pd.DataFrame):
+    """
+    plot the joint plot of distance and angle
+    """
     plt.figure(figsize=(8, 5))
     sns.jointplot(x='shot_distance', y='shotAngle', data=df, kind='hist', bins=20)
     plt.xlabel('Distance from the gate')
@@ -128,7 +168,10 @@ def joint_plot(df):
 
 
 
-def prob_by_distance(df):
+def prob_by_distance(df: pd.DataFrame):
+    """
+    Divide the distance into 20 intervals and plot the goal rate by distance
+    """
 
     df = init_distance_bins(df)
     
@@ -146,7 +189,10 @@ def prob_by_distance(df):
 
 
 
-def prob_by_angle(df):
+def prob_by_angle(d: pd.DataFrame):
+    """
+    Divide the angle into 20 intervals and plot the goal rate by angle
+    """
 
     df = init_angle_bins(df)
     
@@ -164,7 +210,10 @@ def prob_by_angle(df):
 
 
 
-def check_emptyNet(df):
+def check_emptyNet(df: pd.DataFrame):
+    """
+    Split the data into empty net and non-empty net and plot the goal rate by distance
+    """
 
     bins = np.linspace(0, df['shot_distance'].max(), 20)
 
