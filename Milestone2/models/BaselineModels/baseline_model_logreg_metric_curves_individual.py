@@ -13,23 +13,14 @@ import sys
 
 
 # Read in data and assign X and y
-data = pd.read_csv('../../features/train_data.csv', index_col=0)
-X = data[['shot_distance', 'shot_angle' ]]
-X = X.rename({'shot_distance': 'distanceFromNet', 'shot_angle': 'angleFromNet'}, axis=1)
-X.interpolate(method='linear', inplace=True)
-
-
-# Check for NaN values in the entire DataFrame 'X'
-has_nan = X.isna().any().any()
-
-if has_nan:
-    print("There are NaN values in the DataFrame 'X'.")
-    X.dropna(inplace=True)  # This will remove rows with NaN values in the DataFrame X
-else:
-    print("There are no NaN values in the DataFrame 'X'.")
-
+data = pd.read_csv('../../../IFT6758_Data/train_data.csv', index_col=0)
+print(data.head())
+#data.dropna(inplace=True)
+X = data[['shotDistance']]
 y = data[['is_goal']]
-
+# Drop rows with NaN values from both X and y
+X = X.dropna()
+y = y.loc[X.index]
 
 def Log_reg(X, y, feature_list):
     '''
@@ -164,7 +155,7 @@ def plot_goal_rates(goal_rate_df):
 
     plt.xlabel('Shot probability model percentile', fontsize=16)
     plt.title('Goal Rate')
-    plt.ylabel('Goals / (Shots+Goals)%', fontsize=16)
+    plt.ylabel('Goals / (not Goals+Goals)%', fontsize=16)
     plt.show()
 
 def plot_cumulative_goal_rates(df_percentile):
@@ -201,14 +192,14 @@ def plot_calibration_curve_prediction(y_val, pred_probs):
     plt.xlabel('Mean predicted probability', fontsize=16)
     plt.show()
 
-feature_list = ['distanceFromNet', 'angleFromNet']
-#feature_list = ['distanceFromNet']
+#feature_list = ['distanceFromNet', 'angleFromNet']
+feature_list = ['shotDistance']
 X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, feature_list)
 #X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, ['angleFromNet'])
 print(f'Accuracy score is {accuracy}')
-plot_ROC(y_val, pred_probs, 'ROC curve for distance')
-#print(pred_probs)
-#print(y_val)
+#plot_ROC(y_val, pred_probs, 'ROC curve for distance')
+print(pred_probs)
+print(y_val)
 
 # Look at where it's all gone wrong
 X_val_compar = X_val.copy()
@@ -218,38 +209,13 @@ wrong_preds = X_val_compar[X_val_compar['preds'] != X_val_compar['actual']]
 #print(wrong_preds)
 wrong_preds.describe()
 
-pred_probs
+print(pred_probs)
 
 df_percentile =  calc_percentile(pred_probs, y_val)
-df_percentile
+print(df_percentile.head())
 
-feature_list = ['distanceFromNet', 'angleFromNet']
-feature_list = ['distanceFromNet']
-X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, feature_list)
-
-df_percentile =  calc_percentile(pred_probs, y_val)
-goal_rate_df = goal_rate(df_percentile)
-print(f'Accuracy score is {accuracy}')
-
-plot_ROC(y_val, pred_probs, 'ROC curve for distance')
-plot_goal_rates(goal_rate_df)
-plot_cumulative_goal_rates(df_percentile)
-plot_calibration_curve_prediction(y_val, pred_probs)
-
-feature_list = ['angleFromNet']
-X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, feature_list)
-
-df_percentile =  calc_percentile(pred_probs, y_val)
-goal_rate_df = goal_rate(df_percentile)
-print(f'Accuracy score is {accuracy}')
-
-plot_ROC(y_val, pred_probs, 'ROC curve for distance')
-plot_goal_rates(goal_rate_df)
-plot_cumulative_goal_rates(df_percentile)
-plot_calibration_curve_prediction(y_val, pred_probs)
-
-feature_list = ['distanceFromNet', 'angleFromNet']
-
+#feature_list = ['distanceFromNet', 'angleFromNet']
+feature_list = ['shotDistance']
 X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, feature_list)
 
 df_percentile =  calc_percentile(pred_probs, y_val)

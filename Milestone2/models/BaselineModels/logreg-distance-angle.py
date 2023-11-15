@@ -13,7 +13,7 @@ import matplotlib.ticker as ticker
 # Read in data and assign X and y
 data = pd.read_csv('../../../IFT6758_Data/train_data.csv', index_col=0)
 X = data[['shot_distance', 'shot_angle' ]]
-X = X.rename({'shot_distance': 'distanceFromNet', 'shot_angle': 'angleFromNet'}, axis=1)
+X = X.rename({'shotDistance': 'distanceFromNet', 'shotAngle': 'angleFromNet'}, axis=1)
 X.interpolate(method='linear', inplace=True)
 
 # Check for NaN values in the entire DataFrame 'X'

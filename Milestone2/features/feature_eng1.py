@@ -49,7 +49,7 @@ def generate_train_set(DATA_PATH):
     train_df = pd.concat([train_df, year_integration(DATA_PATH, 2019)], ignore_index=True)
 
     train_df['shotAngle'] = train_df.apply(calculate_shot_angle, axis=1)
-    train_df['shot_distance'] = train_df.apply(calculate_shot_distance, axis=1)
+    train_df['shotDistance'] = train_df.apply(calculate_shot_distance, axis=1)
     train_df['emptyNet'] = train_df.apply(standardize_emptyNet, axis=1)
     train_df['is_goal'] = train_df.apply(is_goal, axis=1)
 
