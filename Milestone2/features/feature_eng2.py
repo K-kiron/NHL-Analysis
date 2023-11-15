@@ -155,24 +155,18 @@ def season_integration_eng2(path, year, season) -> pd.DataFrame:
     return df
 
 
-def feature_eng2(path, year,season) -> pd.DataFrame:
+def feature_eng2(path, year) -> pd.DataFrame:
     df = pd.DataFrame()
-    #for season in ['regular', 'playoffs']:
-    #    season_df = season_integration_eng2(path, year, season)
-    #    df = pd.concat([df, season_df], ignore_index=True)
-    #return df
-    season_df = season_integration_eng2(path, year, season)
-    df = pd.concat([df, season_df], ignore_index=True)
+    for season in ['regular', 'playoffs']:
+        season_df = season_integration_eng2(path, year, season)
+        df = pd.concat([df, season_df], ignore_index=True)
     return df
 
-def feature_eng2_cleaned(path, year, season) -> pd.DataFrame:
+def feature_eng2_cleaned(path, year) -> pd.DataFrame:
     df = pd.DataFrame()
-    #for season in ['regular', 'playoffs']:
-    #    season_df = season_integration_eng2(path, year, season)
-    #    df = pd.concat([df, season_df], ignore_index=True)
-    #return df[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away', 'is_goal']]
-    season_df = season_integration_eng2(path, year, season)
-    df = pd.concat([df, season_df], ignore_index=True)
+    for season in ['regular', 'playoffs']:
+        season_df = season_integration_eng2(path, year, season)
+        df = pd.concat([df, season_df], ignore_index=True)
     return df[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away', 'is_goal']]
 
 def get_train_data(DATA_PATH):
@@ -184,11 +178,9 @@ def get_train_data(DATA_PATH):
     data.to_csv(DATA_PATH + '/clean_train_data.csv')
 
 def get_test_data(DATA_PATH):
-    #data = feature_eng2_cleaned(DATA_PATH, 2020, 'regular')
-    #data.to_csv(DATA_PATH + '/clean_test_data_regular.csv')
+    data = feature_eng2_cleaned(DATA_PATH, 2020)
 
-    data = feature_eng2(DATA_PATH, 2020,'playoffs')
-    data.to_csv(DATA_PATH + '/clean_test_data_playoff.csv')
+    data.to_csv(DATA_PATH + '/clean_test_data.csv')
 
 def get_full_test_data(DATA_PATH):
     data = feature_eng2(DATA_PATH, 2020)
