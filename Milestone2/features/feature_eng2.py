@@ -48,7 +48,7 @@ def binary2cumulative(lst: list) -> list:
         nlst.append(count)
     return nlst
 
-def power_play(df: DataFrame, select_period: int) -> np.array:
+def power_play(df: pd.DataFrame, select_period: int) -> np.array:
     '''
     Returns arrays documenting time since power play started for all teams, home team, and away team for a chosen period
     Returns arrays documenting the number of player on the field as a function of time for a chosen period
@@ -126,7 +126,7 @@ def power_play(df: DataFrame, select_period: int) -> np.array:
     return binary2cumulative(timer), binary2cumulative(timer_home), binary2cumulative(timer_away), players_home, players_away
 
 
-def is_goal(df: DataFrame) -> bool:
+def is_goal(df: pd.DataFrame) -> bool:
     '''
     Arguments:
         df (Dataframe): Database dataframe
