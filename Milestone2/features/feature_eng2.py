@@ -221,7 +221,16 @@ def feature_eng2_raw(DATA_PATH, year, season, game_id):
 # Get json files in parent directory
 json_regex = re.compile(r"(.*)\.json")
 
-def season_integration_eng2(path, year, season) -> pd.DataFrame:
+def season_integration_eng2(path: str, year: int, season: str) -> pd.DataFrame:
+    '''
+    Arguments:
+        path (str): DATA_PATH
+        year (int): year in which the game was played
+        season (str): season in which the game was played
+
+    Returns: df (DataFrame) containing data from all games in chosen season
+        
+    '''
     df = pd.DataFrame()
     season_path = os.path.join(path, str(year), season)
     i = 0
