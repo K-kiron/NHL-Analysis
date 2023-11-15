@@ -11,22 +11,6 @@ PROJECT_PATH = '../../Milestone2/'
 sys.path.append(PROJECT_PATH)
 from features.tidy_data import tidy_data
 from visualizations.simple_visualization import *
-
-
-
-
-# def calculate_shot_angle(df: pd.DataFrame) -> float:
-#     """
-#     Calculate the angle of the shot from the goal post
-
-#     Return the angle of the shot
-#     """
-#     if df['goal_location'] == 'Left':
-#         # calculate angle to (-89, 0)
-#         return np.degrees(np.arctan2(np.abs(df['y_coordinate']), np.abs(df['x_coordinate'] + 89)))
-#     elif df['goal_location'] == 'Right':
-#         # calculate angle to (89, 0)
-#         return np.degrees(np.arctan2(np.abs(df['y_coordinate']), np.abs(df['x_coordinate'] - 89)))
     
 
     
