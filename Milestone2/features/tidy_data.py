@@ -5,17 +5,34 @@ import pandas as pd
 import numpy as np
 import math
 
-def tidy_data(path, year, season, game_id):
+def tidy_data(path: str, year: int, season: str, game_id: int) -> pd.DataFrame:
+    '''
+    Arguments:
+        path (str): DATA_PATH
+        year (int): year in which the game was played
+        season (str): season in which the game was played
+        game_id (int): internal NHL game identification
+
+    Returns: DataFrame containing game data for all events
+                All features are listed below under shot_data
+        
+    '''
+
+    # Loading json file
     with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
         game_data = json.load(file)
     
     shot_data_temp = []
     
+    # Loading play Data
     playData = game_data['liveData']['plays']['allPlays']
     homeTeam = game_data['gameData']['teams']['home']['triCode']
     awayTeam = game_data['gameData']['teams']['away']['triCode']
+
+    # Looping through events
     for i in range(len(playData)):
         eventData = playData[i]
+        # Get data for shot/goal events
         if eventData['result']['event'] == 'Shot' or eventData['result']['event'] == 'Goal':
             game_id = game_data['gameData']['game']['pk']
             periodType = eventData['about']['periodType']
@@ -56,7 +73,8 @@ def tidy_data(path, year, season, game_id):
                     goalLocation = 'Right'
                 else:
                     goalLocation = 'Left'
-                    
+            
+            # Computing shot angle based on goal location
             if goalLocation == 'Left' and y_coordinate is not None:
                 shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
             elif goalLocation == 'Right' and y_coordinate is not None:
@@ -67,6 +85,7 @@ def tidy_data(path, year, season, game_id):
             elif goalLocation == 'Right' and y_coordinate is not None:
                 shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate - 89)**2)
             
+            # Storing features
             shot_data = {
                 'game_id': game_id,
                 'homeTeam': homeTeam,
