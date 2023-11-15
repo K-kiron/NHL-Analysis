@@ -34,7 +34,7 @@ def Log_reg(X, y, i):
     
     #Select 0,1,2 for 'Distance from Net', 'Angle from Net', 'Distance and Angle from Net'features.
         experiment = Experiment(
-            api_key="UuHTEgYku8q9Ww3n13pSEgC8d",  
+            api_key="COMET_API_KEY",  
             project_name="nhl-project-b10",
             workspace="ift6758b-project-b10",
             auto_output_logging="simple",
