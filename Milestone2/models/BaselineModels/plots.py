@@ -9,7 +9,25 @@ import matplotlib.ticker as ticker
 
 
 def plot_ROC(y_val,pred_probs):
-    
+     """
+    Generates and displays a Receiver Operating Characteristic (ROC) curve with the corresponding Area Under 
+    the Curve (AUC) metric from true binary labels and prediction probabilities. Optionally, it can save the
+    plot to a file.
+
+    The ROC curve plots the True Positive Rate (TPR) against the False Positive Rate (FPR) across different 
+    thresholds. The function also plots a diagonal line representing the performance of a random classifier 
+    for reference. The AUC value is calculated and displayed in the legend.
+
+    Parameters:
+    - y_val (array-like): True binary labels in range {0, 1} or {-1, 1}.
+    - probs (array-like): Probability estimates of the positive class, returned by a classifier.
+    - title (str, optional): Title for the plot. If not specified, no title is added.
+    - savename (str, optional): If provided, the plot will be saved to a file with this name.
+
+    Returns:
+    None
+
+    """    
     #Plots an ROC curve for the given y (ground truth) and model probabilities, and calculates the AUC.
     
     y_val = pd.DataFrame(y_val)
@@ -47,7 +65,23 @@ def plot_ROC(y_val,pred_probs):
     ##plt.show()
     
 def calc_percentile(pred_probs, y_val):
-    
+        """
+    Calculates the percentile rank of predicted probabilities and merges it with the actual goal labels.
+
+    This function takes the predicted probabilities for the positive class (goals) and the actual 
+    labels (is_goal), computes the percentile rank for each predicted probability, and then merges 
+    these percentiles with the actual labels into a single DataFrame.
+
+    Parameters:
+    - pred_probs (np.ndarray): A 2D numpy array with probability estimates from a classifier. The 
+      second column should contain the probabilities of the positive class.
+    - y_val (pd.Series or pd.DataFrame): The true binary labels for the validation set.
+
+    Returns:
+    - df_percentile (pd.DataFrame): A DataFrame containing the goal probabilities, actual labels, 
+      and the calculated percentile ranks.
+
+    """
     #Create a df for shot probabilities
     df_probs = pd.DataFrame(pred_probs)
     df_probs = df_probs.rename(columns={0: "Not_Goal_prob", 1: "Goal_prob"})
@@ -65,7 +99,24 @@ def calc_percentile(pred_probs, y_val):
     return df_percentile
 
 def goal_rate(df_percentile):
-   
+       """
+    Calculates the goal rate per percentile bin and returns a DataFrame with these rates.
+
+    This function takes a DataFrame containing the percentile ranks of predicted probabilities 
+    and the actual goal outcomes. It divides the data into bins based on percentile ranks and 
+    calculates the rate of goals in each bin. The goal rate is defined as the number of goals 
+    divided by the total number of shots in the bin, expressed as a percentage.
+
+    Parameters:
+    - df_percentile (pd.DataFrame): A DataFrame with two columns: 'Percentile' which contains 
+      the percentile ranks, and 'is_goal' which contains the binary indicator of whether a shot 
+      was a goal (1) or not (0).
+
+    Returns:
+    - goal_rate_df (pd.DataFrame): A DataFrame with each row representing a bin and two columns: 
+      'Rate', the percentage of shots that were goals in each bin; and 'Percentile', the lower 
+      bound of the percentile bin.
+    """
     rate_list = []
     
     # Find total number of goals
@@ -103,6 +154,24 @@ def goal_rate(df_percentile):
     return goal_rate_df
 
 def plot_goal_rates(goal_rate_df):
+          """
+    Plots the goal rates against shot probability model percentiles.
+
+    This function takes a DataFrame containing goal rates and their corresponding percentile bins
+    and plots the rates on the y-axis against the percentile bins on the x-axis. The plot is styled
+    with grid lines, a light grey background, and custom tick marks. The x-axis is inverted so that
+    the highest percentiles appear on the left. This visualization helps in understanding the
+    relationship between the model's confidence in its predictions (as measured by the percentile
+    rank of predicted probabilities) and the actual rate of goals scored.
+
+    Parameters:
+    - goal_rate_df (pd.DataFrame): A DataFrame with 'Rate' and 'Percentile' columns. 'Rate'
+      should contain the goal rate for each bin, and 'Percentile' should contain the lower bound
+      of the percentile bin.
+    Returns:
+    None
+      """ 
+
     plt.figure(figsize=(8,6))
     
     ax = plt.gca()
@@ -129,7 +198,24 @@ def plot_goal_rates(goal_rate_df):
     #plt.show()
     
 def plot_cumulative_goal_rates(df_percentile):
+        """
+    Plots the cumulative distribution of goals over the percentile ranks of predicted probabilities.
+
+    The function filters the input DataFrame for actual goals and uses the empirical cumulative 
+    distribution function (ECDF) to plot the proportion of total goals that are below each 
+    percentile rank threshold. The x-axis represents the percentile ranks adjusted to a descending 
+    order (i.e., higher percentiles on the left), and the y-axis represents the cumulative 
+    proportion of goals.
+
+    Parameters:
+    - df_percentile (pd.DataFrame): A DataFrame containing a 'Percentile' column with the 
+      percentile ranks and an 'is_goal' column indicating if the event was a goal (1) or not (0).
+
+    Returns:
+    None
+
     
+    """    
     plt.figure(figsize=(8,6))
     df_precentile_only_goal = df_percentile[df_percentile['is_goal'] == 1]
     
@@ -154,7 +240,22 @@ def plot_cumulative_goal_rates(df_percentile):
     #plt.show()
     
 def plot_calibration_curve_prediction(y_val, pred_probs):
+	   """
+    Plots a calibration curve for the predicted probabilities against the actual outcomes.
 
+    The calibration curve, also known as a reliability diagram, shows the relationship between 
+    predicted probabilities and the actual outcomes. It visualizes how well the predicted 
+    probabilities of a classifier are calibrated. The function uses the `CalibrationDisplay` 
+    from the scikit-learn library to generate the plot. The number of bins to discretize the 
+    [0, 1] range into uniform bins for calibration is set to 50.
+
+    Parameters:
+    - y_val (pd.DataFrame or pd.Series): Actual binary labels for the validation set.
+    - pred_probs (np.ndarray): Predicted probabilities for the positive class (second column of the array).
+
+    Returns:
+    None
+    """
     y_val = pd.DataFrame(y_val)
     y_val = y_val.rename(columns={0: "is_goal"})
 

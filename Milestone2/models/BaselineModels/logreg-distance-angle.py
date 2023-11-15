@@ -15,26 +15,39 @@ data = pd.read_csv('../../../IFT6758_Data/train_data.csv', index_col=0)
 X = data[['shot_distance', 'shot_angle' ]]
 X = X.rename({'shotDistance': 'distanceFromNet', 'shotAngle': 'angleFromNet'}, axis=1)
 X.interpolate(method='linear', inplace=True)
-
-# Check for NaN values in the entire DataFrame 'X'
-has_nan = X.isna().any().any()
-
-if has_nan:
-    print("There are NaN values in the DataFrame 'X'.")
-    X.interpolate(method='linear', inplace=True)
-else:
-    print("There are no NaN values in the DataFrame 'X'.")
-
 y = data[['is_goal']]
-
+# Drop rows with NaN values from both X and y
+X = X.dropna()
+y = y.loc[X.index]
 
 def Log_reg(X, y, feature_list):
-    '''
-    Arguments:
-    X = pd.dataframe X
-    y = target labels
-    feature_list = list of features
-    '''
+        """
+    Trains and validates a logistic regression model using a specified list of features.
+    
+    This function splits the input data into training and validation sets, 
+    trains a logistic regression model on the training set, and calculates 
+    the accuracy of the model on the validation set. It returns the validation 
+    set, the predicted values, the model's accuracy, and the probability 
+    estimates for the validation set.
+
+    Parameters:
+    - X (pd.DataFrame): A DataFrame containing the features of the dataset.
+    - y (pd.Series or pd.DataFrame): The target variable associated with the dataset.
+    - feature_list (list): A list of strings representing the names of the features to be used for training the logistic regression model.
+
+    Returns:
+    - X_val (pd.DataFrame): The features of the validation set.
+    - y_val (pd.Series or pd.DataFrame): The true target values for the validation set.
+    - y_pred (np.ndarray): The predictions made by the model for the validation set.
+    - accuracy (float): The accuracy score of the model on the validation set.
+    - pred_probs (np.ndarray): The probability estimates for the validation set.
+
+    Note:
+    - The function sets the `random_state` parameter to 42 to ensure reproducibility.
+    - The function prints the model's accuracy on the validation set.
+    
+    """
+
     #print(X[feature_list])
     X_train,X_val,y_train,y_val = train_test_split(X[feature_list], y, test_size=0.2, random_state=42)
 
@@ -53,6 +66,25 @@ def Log_reg(X, y, feature_list):
     return X_val, y_val, y_pred, accuracy,  pred_probs
 
 def plot_roc_all_feat(X, y):
+
+    """
+    Plots ROC curves for logistic regression models trained on different feature sets.
+
+    This function iterates over a list of feature sets, trains a logistic regression model for each,
+    and plots the ROC curve on the same graph for comparison. The ROC curves are color-coded for 
+    distinction. It also calculates and displays the AUC score for each model. Additionally, this 
+    function plots a ROC curve for a random baseline model.
+
+    Parameters:
+    - X (pd.DataFrame): The feature data used for training the models.
+    - y (pd.Series or pd.DataFrame): The target variable for the models.
+
+    Returns:
+    None
+    Outputs:
+    A plot is displayed showing ROC curves for each feature set and a random baseline. The plot 
+    is saved as '3a_ROC_curves.png' in the current working directory.
+    """
 
     fig = plt.figure(figsize=(12,10))
 
@@ -100,7 +132,22 @@ def plot_roc_all_feat(X, y):
 plot_roc_all_feat(X,y)
 
 def calc_percentile(pred_probs, y_val):
+    """
+    Calculates the percentile rank of predicted probabilities and merges it with the actual goal labels.
 
+    This function takes the predicted probabilities for the positive class (goals) and the actual 
+    labels (is_goal), computes the percentile rank for each predicted probability, and then merges 
+    these percentiles with the actual labels into a single DataFrame.
+
+    Parameters:
+    - pred_probs (np.ndarray): A 2D numpy array with probability estimates from a classifier. The 
+      second column should contain the probabilities of the positive class.
+    - y_val (pd.Series or pd.DataFrame): The true binary labels for the validation set.
+
+    Returns:
+    - df_percentile (pd.DataFrame): A DataFrame containing the goal probabilities, actual labels, 
+      and the calculated percentile ranks.
+	"""
     #Create a df for shot probabilities
     df_probs = pd.DataFrame(pred_probs)
     df_probs = df_probs.rename(columns={0: "Not_Goal_prob", 1: "Goal_prob"})
@@ -116,7 +163,24 @@ def calc_percentile(pred_probs, y_val):
     return df_percentile
 
 def goal_rate(df_percentile):
+    """
+    Calculates the goal rate per percentile bin and returns a DataFrame with these rates.
 
+    This function takes a DataFrame containing the percentile ranks of predicted probabilities 
+    and the actual goal outcomes. It divides the data into bins based on percentile ranks and 
+    calculates the rate of goals in each bin. The goal rate is defined as the number of goals 
+    divided by the total number of shots in the bin, expressed as a percentage.
+
+    Parameters:
+    - df_percentile (pd.DataFrame): A DataFrame with two columns: 'Percentile' which contains 
+      the percentile ranks, and 'is_goal' which contains the binary indicator of whether a shot 
+      was a goal (1) or not (0).
+
+    Returns:
+    - goal_rate_df (pd.DataFrame): A DataFrame with each row representing a bin and two columns: 
+      'Rate', the percentage of shots that were goals in each bin; and 'Percentile', the lower 
+      bound of the percentile bin.
+    """
     rate_list = []
 
     # Find total number of goals
@@ -154,6 +218,26 @@ def goal_rate(df_percentile):
     return goal_rate_df
 
 def plot_goal_rate_all_feat(X, y):
+    """
+    Plots goal rates against shot probability model percentiles for different feature sets.
+
+    For each set of features provided, this function trains a logistic regression model,
+    calculates the percentile of predicted probabilities, computes goal rates, and plots
+    these rates. It generates a single figure with multiple lines representing the goal
+    rates as a function of model confidence percentiles for each feature set. Additionally,
+    it computes and plots a random baseline for comparison.
+
+    Parameters:
+    - X (pd.DataFrame): The feature data used for training the models.
+    - y (pd.Series or pd.DataFrame): The target variable for the models.
+
+    Returns:
+    None
+    
+    Outputs:
+    A plot is displayed showing goal rates for each feature set and a random baseline. The plot 
+    is saved as '3b_goal_rates.png' in the current working directory.
+    """
 
     fig = plt.figure(figsize=(12,10))
 
@@ -219,7 +303,26 @@ def plot_goal_rate_all_feat(X, y):
 plot_goal_rate_all_feat(X,y)
 
 def plot_cumulative_rate_all_feat(X, y):
+   """
+    Plots the empirical cumulative distribution function (ECDF) of goals for logistic regression models
+    trained on different sets of features, including a comparison to a random baseline.
 
+    For each specified feature set, the function trains a logistic regression model and computes the
+    percentile of the predicted probabilities. It then filters for actual goal outcomes and plots the
+    ECDF, showing the proportion of goals below each percentile rank threshold. The plots are
+    color-coded for each feature set for easy comparison. A random baseline ECDF is also plotted.
+
+    Parameters:
+    - X (pd.DataFrame): The feature data used for training the models.
+    - y (pd.Series or pd.DataFrame): The target variable for the models.
+
+    Returns:
+    None
+
+    Outputs:
+    A plot is displayed showing the ECDF of goals for each feature set and a random baseline. The plot
+    is saved as '3c_goal_proportions.png' in the current working directory.
+    """
     fig = plt.figure(figsize=(12,10))
 
     feature_list = (['distanceFromNet'], ['angleFromNet'], ['distanceFromNet', 'angleFromNet']  )
@@ -279,7 +382,26 @@ def plot_cumulative_rate_all_feat(X, y):
 plot_cumulative_rate_all_feat(X, y)
 
 def plot_calibration_all_feat(X, y):
+    """
+    Plots calibration curves for logistic regression models trained on different feature sets, 
+    including a calibration curve for a random baseline.
 
+    For each specified feature set, the function trains a logistic regression model, obtains 
+    predicted probabilities, and uses these to plot a calibration curve, which shows how well the 
+    predicted probabilities are calibrated. A calibration curve for a random baseline is also plotted 
+    for comparison. The subplots are arranged in a grid where each row corresponds to a feature set.
+
+    Parameters:
+    - X (pd.DataFrame): The feature data used for training the models.
+    - y (pd.Series or pd.DataFrame): The target variable for the models.
+
+    Returns:
+    None
+
+    Outputs:
+    A plot is displayed showing calibration curves for each feature set and a random baseline. The plot 
+    is saved as '3d_calibration_plots.png' in the current working directory.
+    """
     fig = plt.figure(figsize=(20, 20))
     gs = GridSpec(4, 3)
 

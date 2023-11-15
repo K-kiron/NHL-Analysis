@@ -28,7 +28,31 @@ X = X.rename({'shotDistance': 'distanceFromNet', 'shotAngle': 'angleFromNet'}, a
 y = data[['is_goal']]
 
 def Log_reg(X, y, i):
-    
+        """
+    Trains a logistic regression model using specified features from the input data, evaluates its performance,
+    and logs the experiment results to Comet.ml. The function also generates and saves various plots such as
+    ROC curve, goal rate plot, cumulative goal rate plot, and calibration curve.
+
+    The model is trained on the features specified by the index 'i', which selects from predefined feature sets.
+
+    Parameters:
+    - X (pd.DataFrame): DataFrame containing the input features for the model.
+    - y (pd.Series): Series containing the binary target variable for the model.
+    - i (int): Index to select the feature set for training the model. Possible values are:
+        0 for 'Distance from Net',
+        1 for 'Angle from Net',
+        2 for 'Distance and Angle from Net'.
+
+    Returns:
+    A tuple containing:
+    - pred_probs (np.ndarray): The probability estimates for the validation set.
+    - accuracy (float): The accuracy of the model on the validation set.
+    - f1_score (float): The F1 score of the model on the validation set.
+    - precision (float): The precision of the model on the validation set.
+    - recall (float): The recall of the model on the validation set.
+    - roc_auc (float): The ROC AUC score of the model on the validation set.
+    - cf_matrix (np.ndarray): The confusion matrix of the model on the validation set.
+    """
         feature_list = (['distanceFromNet'], ['angleFromNet'], ['distanceFromNet', 'angleFromNet']  )
         feature_name_list = ['distance', 'angle', 'distance_angle']
     
