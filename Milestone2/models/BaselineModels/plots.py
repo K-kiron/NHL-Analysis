@@ -12,6 +12,9 @@ def plot_ROC(y_val,pred_probs):
     
     #Plots an ROC curve for the given y (ground truth) and model probabilities, and calculates the AUC.
     
+    y_val = pd.DataFrame(y_val)
+    y_val = y_val.rename(columns={0: "is_goal"})
+
     probs_isgoal = pred_probs[:,1]
     fpr, tpr, _ = roc_curve(y_val,probs_isgoal)
     roc_auc = auc(fpr,tpr)
@@ -41,7 +44,7 @@ def plot_ROC(y_val,pred_probs):
     ax.set_facecolor('0.95')
     plt.tight_layout()
     plt.savefig('roc_curve.png')
-    plt.show()
+    ##plt.show()
     
 def calc_percentile(pred_probs, y_val):
     
@@ -49,6 +52,8 @@ def calc_percentile(pred_probs, y_val):
     df_probs = pd.DataFrame(pred_probs)
     df_probs = df_probs.rename(columns={0: "Not_Goal_prob", 1: "Goal_prob"})
     
+    y_val = pd.DataFrame(y_val)
+    y_val = y_val.rename(columns={0: "is_goal"})
     # Combining 'Goal Probability' and 'Is Goal' into one df. 
     df_probs = pd.concat([df_probs["Goal_prob"].reset_index(drop=True), y_val["is_goal"].reset_index(drop=True)],axis=1)
     
@@ -121,7 +126,7 @@ def plot_goal_rates(goal_rate_df):
     plt.title('Goal Rate', fontsize=16)
     plt.ylabel('Goals / (Shots+Goals)%', fontsize=16)
     plt.savefig('goal_rate_plot.png')
-    plt.show()
+    #plt.show()
     
 def plot_cumulative_goal_rates(df_percentile):
     
@@ -146,9 +151,13 @@ def plot_cumulative_goal_rates(df_percentile):
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
     plt.savefig('cumulative_goal_rate.png')
     ax.legend(['Logistic Regression'])
-    plt.show()
+    #plt.show()
     
 def plot_calibration_curve_prediction(y_val, pred_probs):
+
+    y_val = pd.DataFrame(y_val)
+    y_val = y_val.rename(columns={0: "is_goal"})
+
     plt.figure(figsize=(8,6))
     
     ax = CalibrationDisplay.from_predictions(y_val['is_goal'],pred_probs[:,1], n_bins=50)
@@ -162,4 +171,4 @@ def plot_calibration_curve_prediction(y_val, pred_probs):
     ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
     plt.savefig('calibration_curve.png')
-    plt.show()
+    #plt.show()

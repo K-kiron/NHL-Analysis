@@ -11,7 +11,7 @@ from matplotlib.gridspec import GridSpec
 import matplotlib.ticker as ticker
 
 # Read in data and assign X and y
-data = pd.read_csv('../../features/train_data.csv', index_col=0)
+data = pd.read_csv('../../../IFT6758_Data/train_data.csv', index_col=0)
 X = data[['shot_distance', 'shot_angle' ]]
 X = X.rename({'shot_distance': 'distanceFromNet', 'shot_angle': 'angleFromNet'}, axis=1)
 X.interpolate(method='linear', inplace=True)
@@ -210,7 +210,7 @@ def plot_goal_rate_all_feat(X, y):
     plt.grid(True)
     plt.title('Goal Rate', fontsize=20)
     plt.xlabel('Shot probability model percentile', fontsize=16)
-    plt.ylabel('Goals / (Shots+Goals)%', fontsize=16)
+    plt.ylabel('Goals / (Shots)%', fontsize=16)
     plt.legend(loc=2,prop={'size': 16})
     plt.tight_layout()
     plt.savefig(f'3b_goal_rates.png')
