@@ -158,42 +158,27 @@ def calc_percentile(pred_probs, y_val):
 
     return df_percentile
 
-def plot_roc_all_feat(X, y, model, filenm):
+def plot_roc_all_feat(y_true, y_preds, model_list, filenm, color_list, baseline = True):
     fig = plt.figure(figsize=(12, 10))
 
-    feature_list = (['shotDistance'], ['shotAngle'], ['shotDistance', 'shotAngle'])
-    feature_color_list = ['red', 'blue', 'green']
-    plot_label_list = ['Distance from Net', 'Angle from Net', 'Distance and Angle from Net']
+    for i, pred in enumerate(y_preds):
 
-    for i, feature in enumerate(feature_list):
-        X_train, X_val, y_train, y_val = train_test_split(X[feature], y, test_size=0.2, random_state=42, stratify=y)
+        plot_color = color_list[i]
+        plot_label = model_list[i]
 
-        # Fit the model
-        model.fit(X_train, y_train)
-
-        # Obtain the predictions and prediction probabilities
-        y_pred_prob = model.predict_proba(X_val)
-        y_pred = model.predict(X_val)
-
-        accuracy = metrics.accuracy_score(y_val, y_pred)
-        print(f'Accuracy score is {accuracy}')
-
-        plot_color = feature_color_list[i]
-        plot_label = plot_label_list[i]
-
-        probs_isgoal = y_pred_prob[:, 1]
-        fpr, tpr, _ = metrics.roc_curve(y_val, probs_isgoal)
+        fpr, tpr, _ = metrics.roc_curve(y_true, pred)
         roc_auc = metrics.auc(fpr, tpr)
 
         plt.plot(fpr, tpr, color=plot_color, label=f'{plot_label} ' + 'AUC = %0.2f' % roc_auc, lw=2)
 
     # Random Baseline
-    baseline_is_goal = np.random.uniform(0, 1, probs_isgoal.shape[0])
-    plot_color = 'Magenta'
-    plot_label = 'Random Baseline'
-    fpr, tpr, _ = metrics.roc_curve(y_val, baseline_is_goal)
-    roc_auc = metrics.auc(fpr, tpr)
-    plt.plot(fpr, tpr, color=plot_color, label=f'{plot_label} ' + 'AUC = %0.2f' % roc_auc, lw=2)
+    if baseline:
+        baseline_is_goal = np.random.uniform(0, 1, y_preds[0].shape[0])
+        plot_color = 'Magenta'
+        plot_label = 'Random Baseline'
+        fpr, tpr, _ = metrics.roc_curve(y_true, baseline_is_goal)
+        roc_auc = metrics.auc(fpr, tpr)
+        plt.plot(fpr, tpr, color=plot_color, label=f'{plot_label} ' + 'AUC = %0.2f' % roc_auc, lw=2)
 
     ax = plt.gca()
     ax.grid()
@@ -210,32 +195,16 @@ def plot_roc_all_feat(X, y, model, filenm):
     plt.savefig(f'{filenm}.png')
     plt.show()
 
-def plot_goal_rate_all_feat(X, y, model, filenm):
+def plot_goal_rate_all_feat(y_true, y_preds, model_list, filenm, color_list, baseline = True):
 
     fig = plt.figure(figsize=(12,10))
 
-    feature_list = (['shotDistance'], ['shotAngle'], ['shotDistance', 'shotAngle'])
-    feature_color_list = ['red', 'blue', 'green']
-    plot_label_list = ['Distance from Net', 'Angle from Net', 'Distance and Angle from Net']
+    for i, pred in enumerate(y_preds):
 
-    #if model_name == 'LR':
-    for i, feature in enumerate(feature_list):
-        X_train, X_val, y_train, y_val = train_test_split(X[feature], y, test_size=0.2, random_state=42, stratify=y)
+        plot_color = color_list[i]
+        plot_label = model_list[i]
 
-        # Fit the model
-        model.fit(X_train, y_train)
-
-        # Obtain the predictions and prediction probabilities
-        y_pred_prob = model.predict_proba(X_val)
-        y_pred = model.predict(X_val)
-
-        accuracy = metrics.accuracy_score(y_val, y_pred)
-        print(f'Accuracy score is {accuracy}')
-
-        plot_color = feature_color_list[i]
-        plot_label = plot_label_list[i]
-
-        df_percentile =  calc_percentile(y_pred_prob, y_val)
+        df_percentile =  calc_percentile(pred, y_true)
         goal_rate_df = goal_rate(df_percentile)
         goal_rate_x = goal_rate_df['Percentile']
         goal_rate_y = goal_rate_df['Rate']
@@ -243,20 +212,18 @@ def plot_goal_rate_all_feat(X, y, model, filenm):
 
 
     #Random Baseline
-    probs_isgoal = y_pred_prob[:,1]
-    baseline_is_goal = np.random.uniform(0,1,probs_isgoal.shape[0])
-    no_baseline_goal = np.array([(1-i) for i in baseline_is_goal])
-    random_probs = np.column_stack((baseline_is_goal, no_baseline_goal))
-    df_percentile =  calc_percentile(random_probs, y_val)
-    goal_rate_df = goal_rate(df_percentile)
-    goal_rate_x = goal_rate_df['Percentile']
-    goal_rate_y = goal_rate_df['Rate']
+    if baseline:
+        baseline_is_goal = np.random.uniform(0,1,y_preds[0].shape[0])
+        no_baseline_goal = np.array([(1-i) for i in baseline_is_goal])
+        random_probs = np.column_stack((baseline_is_goal, no_baseline_goal))
+        df_percentile =  calc_percentile(random_probs, y_true)
+        goal_rate_df = goal_rate(df_percentile)
+        goal_rate_x = goal_rate_df['Percentile']
+        goal_rate_y = goal_rate_df['Rate']
 
-    plot_color = 'Magenta'
-    plot_label = 'Random Baseline'
-    plt.plot(goal_rate_x,goal_rate_y, color = plot_color, label = f'{plot_label}' )
-
-
+        plot_color = 'Magenta'
+        plot_label = 'Random Baseline'
+        plt.plot(goal_rate_x,goal_rate_y, color = plot_color, label = f'{plot_label}' )
 
     ax = plt.gca()
     ax.grid()
@@ -281,45 +248,30 @@ def plot_goal_rate_all_feat(X, y, model, filenm):
     plt.savefig(f'{filenm}.png')
     plt.show()
 
-def plot_cumulative_rate_all_feat(X, y, model, filenm):
+def plot_cumulative_rate_all_feat(y_true, y_preds, model_list, filenm, color_list, baseline = True):
 
     fig = plt.figure(figsize=(12,10))
 
-    feature_list = (['shotDistance'], ['shotAngle'], ['shotDistance', 'shotAngle'])
-    feature_color_list = ['red', 'blue', 'green']
-    plot_label_list = ['Distance from Net', 'Angle from Net', 'Distance and Angle from Net']
+    for i, pred in enumerate(y_preds):
 
-    for i, feature in enumerate(feature_list):
-
-        X_train, X_val, y_train, y_val = train_test_split(X[feature], y, test_size=0.2, random_state=42, stratify=y)
-
-        # Fit the model
-        model.fit(X_train, y_train)
-
-        # Obtain the predictions and prediction probabilities
-        y_pred_prob = model.predict_proba(X_val)[:, 1]
-
-        df_percentile = calc_percentile(y_pred_prob, y_val)
+        df_percentile = calc_percentile(pred, y_true)
 
         df_precentile_only_goal = df_percentile[df_percentile['is_goal'] == 1]
 
         ax = sns.ecdfplot(data=df_precentile_only_goal, x=100 - df_precentile_only_goal.Percentile,
-                          color=feature_color_list[i])
-
-
+                          color=color_list[i])
 
     #Random Baseline
-    probs_isgoal = y_pred_prob
-    baseline_is_goal = np.random.uniform(0, 1, probs_isgoal.shape[0])
-    no_baseline_goal = np.array([(1 - i) for i in baseline_is_goal])
-    random_probs = np.column_stack((baseline_is_goal, no_baseline_goal))
-    df_percentile = calc_percentile(random_probs, y_val)
-    df_precentile_only_goal = df_percentile[df_percentile['is_goal'] == 1]
+    if baseline:
+        baseline_is_goal = np.random.uniform(0, 1, y_preds[0].shape[0])
+        no_baseline_goal = np.array([(1 - i) for i in baseline_is_goal])
+        random_probs = np.column_stack((baseline_is_goal, no_baseline_goal))
+        df_percentile = calc_percentile(random_probs, y_true)
+        df_precentile_only_goal = df_percentile[df_percentile['is_goal'] == 1]
 
-    plot_color = 'Magenta'
-    plot_label = 'Random Baseline'
-    ax = sns.ecdfplot(data=df_precentile_only_goal, x=100 - df_precentile_only_goal.Percentile,
-                      color=plot_color)
+        plot_color = 'Magenta'
+        ax = sns.ecdfplot(data=df_precentile_only_goal, x=100 - df_precentile_only_goal.Percentile,
+                          color=plot_color)
 
     ax = plt.gca()
     ax.grid()
@@ -335,57 +287,25 @@ def plot_cumulative_rate_all_feat(X, y, model, filenm):
     ax.set_title(f"Cumulative % of Goals", fontsize=20)
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
 
-    plot_label_list.append('Random Baseline')
-    plt.legend(labels=plot_label_list, fontsize=16)
+    model_list.append('Random Baseline')
+    plt.legend(labels=model_list, fontsize=16)
     plt.tight_layout()
     plt.savefig(f'{filenm}.png')
     plt.show()
 
-def plot_calibration_all_feat(X, y, model, filenm):
+def plot_calibration_all_feat(y_true, y_preds, model_list, filenm, color_list):
 
     fig = plt.figure(figsize=(20, 20))
     gs = GridSpec(4, 3)
 
     ax_calibration_curve = fig.add_subplot(gs[:2, :2])
 
-    feature_list = [['shotDistance'], ['shotAngle'], ['shotDistance', 'shotAngle']]
-    feature_color_list = ['red', 'blue', 'green']
-    plot_label_list = ['Distance from Net', 'Angle from Net', 'Distance and Angle from Net']
+    for i, pred in enumerate(y_preds):
 
-    feature_list.append('RandomBaseline')
+        plot_color = color_list[i]
+        plot_label = model_list[i]
 
-    for i, feature in enumerate(feature_list):
-
-        if feature != 'RandomBaseline':
-            X_train, X_val, y_train, y_val = train_test_split(X[feature], y, test_size=0.2, random_state=42, stratify=y)
-
-            # Fit the model
-            model.fit(X_train, y_train)
-
-            # Obtain the predictions and prediction probabilities
-            y_pred_prob = model.predict_proba(X_val)
-            y_pred = model.predict(X_val)
-
-            accuracy = metrics.accuracy_score(y_val, y_pred)
-            print(f'Accuracy score is {accuracy}')
-
-            y_val_is_goal = y_val
-            pred_probs_is_goal = y_pred_prob[:,1]
-
-            plot_color = feature_color_list[i]
-            plot_label = plot_label_list[i]
-
-        else:
-            random_goal_prob = np.random.uniform(0, 1, len(y_val))
-
-            y_val_is_goal = y_val
-            pred_probs_is_goal = random_goal_prob.copy()
-
-            plot_color = 'magenta'
-            plot_label = 'Random Baseline'
-
-
-        ax_display = CalibrationDisplay.from_predictions(y_val_is_goal,pred_probs_is_goal, n_bins=50,
+        ax_display = CalibrationDisplay.from_predictions(y_true, pred, n_bins=50,
                                                              ax=ax_calibration_curve, color=plot_color, label=plot_label)
 
 

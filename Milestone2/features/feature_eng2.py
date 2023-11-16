@@ -177,15 +177,17 @@ def get_train_data(DATA_PATH):
 
     data.to_csv(DATA_PATH + '/clean_train_data.csv')
 
-def get_test_data(DATA_PATH):
-    data = feature_eng2_cleaned(DATA_PATH, 2020)
+def get_test_data(DATA_PATH, season):
+    data = season_integration_eng2(DATA_PATH, 2020, season)
+    data = data[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away', 'is_goal']]
+    # data = feature_eng2_cleaned(DATA_PATH, 2020)
 
-    data.to_csv(DATA_PATH + '/clean_test_data.csv')
+    data.to_csv(DATA_PATH + f'/clean_test_data_{season}.csv')
 
-def get_full_test_data(DATA_PATH):
-    data = feature_eng2(DATA_PATH, 2020)
+def get_full_test_data(DATA_PATH, season):
+    data = season_integration_eng2(DATA_PATH, 2020, season)
 
-    data.to_csv(DATA_PATH + '/full_test_data.csv')
+    data.to_csv(DATA_PATH + f'/full_test_data_{season}.csv')
 
 def get_full_train_data(DATA_PATH):
     data = feature_eng2(DATA_PATH, 2016)
@@ -196,8 +198,13 @@ def get_full_train_data(DATA_PATH):
     data.to_csv(DATA_PATH + '/full_train_data.csv')
 
 if __name__ == "__main__":
+    PATH = '../../IFT6758_Data'
     dataset = input('Enter train for parsing train data and test for parsing test data: ')
     subset_or_full = input('Enter subset for only feature engineering 2 data and full for all data: ')
+
+    if dataset == 'test':
+        season = input('Enter season as regular or playoffs: ')
+        assert season in ['regular', 'playoffs']
 
     dataset = dataset.strip()
     subset_or_full = subset_or_full.strip()
@@ -206,11 +213,11 @@ if __name__ == "__main__":
 
     if dataset == 'train':
         if subset_or_full == 'subset':
-            get_train_data('../../IFT6758_Data')
+            get_train_data(PATH)
         else:
-            get_full_train_data('../../IFT6758_Data')
+            get_full_train_data(PATH)
     else:
         if subset_or_full == 'subset':
-            get_test_data('../../IFT6758_Data')
+            get_test_data(PATH, season)
         else:
-            get_full_test_data('../../IFT6758_Data')
+            get_full_test_data(PATH, season)
