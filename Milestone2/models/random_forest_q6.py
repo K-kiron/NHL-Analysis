@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[3]:
 
 
 from comet_ml import Experiment
 import numpy as np
 import pickle
 import pandas as pd
+import sklearn
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import RFECV
@@ -20,7 +21,13 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.feature_selection import SelectFromModel
 
 
-# In[2]:
+# In[4]:
+
+
+print(sklearn.__version__)
+
+
+# In[5]:
 
 
 #DATA_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/data"
@@ -39,18 +46,18 @@ from visualizations.simple_visualization import *
 from models.BaselineModels.plots import *
 
 
-# In[3]:
+# In[6]:
 
 
 #get_train_data(DATA_PATH)
 
 
-# In[4]:
+# In[7]:
 
 
 # Loading data and pre-processing
-#X = pd.read_csv(DATA_PATH + '/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/data/clean_train_data.csv', index_col=0)
-X = pd.read_csv(DATA_PATH+'/clean_train_data.csv', index_col=0)
+X = pd.read_csv(DATA_PATH + '/clean_train_data.csv', index_col=0)
+#X = pd.read_csv('/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/data/clean_train_data.csv', index_col=0)
 
 has_nan = X.isna().any().any()
 
@@ -79,7 +86,7 @@ X[boolean_cols] = X[boolean_cols].astype(int)
 X = X.reset_index(drop=True)
 
 
-# In[13]:
+# In[9]:
 
 
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
@@ -90,12 +97,25 @@ sfm = SelectFromModel(rf)
 X_res = sfm.fit_transform(X_train, y_train)
 X_val_selected = sfm.transform(X_val)
 
-params = {'n_estimators': 1,  # You can adjust the number of weak learners
+
+# In[20]:
+
+
+dropped_columns = X_train.columns[~sfm.get_support()]
+kept_columns = X_train.columns[sfm.get_support()] 
+print(dropped_columns)
+print(kept_columns)
+
+
+# In[24]:
+
+
+params = {'n_estimators': 1,
           'learning_rate': 1.0,
           'algorithm': 'SAMME.R',
           'random_state': 42,
           # Try max_depth = 1,3,5
-          'estimator': RandomForestClassifier(max_depth=10),
+          'base_estimator': RandomForestClassifier(max_depth=1),
           }
 
 model = AdaBoostClassifier(**params)
@@ -108,7 +128,7 @@ model.fit(X_res, y_train, sample_weight=sample_weights[y_train])
 y_pred = model.predict(X_val_selected)
 
 
-# In[15]:
+# In[25]:
 
 
 f1 = f1_score(y_val, y_pred)
@@ -121,12 +141,12 @@ recall = recall_score(y_val, y_pred)
 print(f'recall score: {recall}')
 
 
-# In[16]:
+# In[26]:
 
 
-pickle.dump(model, open("ADABoost_rf_max_depth_10.pkl", "wb"))
+pickle.dump(model, open("ADABoost_rf_max_depth_1.pkl", "wb"))
 experiment = Experiment(
-  api_key='M0ld212AYoT5RG6UcLL807o5T',
+  api_key='INSERT API KEY',
   project_name="nhl-project-b10",
   workspace="ift6758b-project-b10"
 )
@@ -134,19 +154,31 @@ experiment = Experiment(
 evaluation = {"accuracy": accuracy, "f1": f1, "recall": recall, "precision": precision}
 params = {
     "model": 'ADABoost',
-    "description": 'ADABoost Classifier with Max Deep = 10 and Random Forest Feature Selection on Feature Eng2 Cleaned Dataframe',
+    "description": 'ADABoost Classifier with Max Deep = 1 and Random Forest Feature Selection on Feature Eng2 Cleaned Dataframe',
     **model.get_params()
 }
-experiment.set_name('ADABoost Max Depth = 10')
+experiment.set_name('ADABoost Max Depth = 1')
 experiment.log_parameters(params)
 experiment.log_metrics(evaluation)
 
-experiment.log_model('ADABoost Max Depth = 10', 'ADABoost_rf_max_depth_10.pkl') #Edit this
+experiment.log_model('ADABoost Max Depth = 1', 'ADABoost_rf_max_depth_1.pkl') #Edit this
 experiment.end() # Important if you are using jupyter
+
+
+# In[19]:
+
+
+y_pred_prob = model.predict_proba(X_val_selected)[:, 1]
+
+df_percentile =  calc_percentile(y_pred_prob, y_val)
+goal_rate_df = goal_rate(df_percentile)
 
 
 # In[ ]:
 
 
-
+plot_ROC(y_val, y_pred_prob, 'ROC curve for ADABoost with Max Depth = 10', '6-6a ROC Curve')
+plot_goal_rates(goal_rate_df, 'ADABoost with Max Depth = 10', '6-6b Goal Rate')
+plot_cumulative_goal_rates(df_percentile, 'ADABoost with Max Depth = 10', '6-6c Cumulative Goal Percentage')
+plot_calibration_curve_prediction(y_val, y_pred_prob, '6-2d Calibration Plot')
 
