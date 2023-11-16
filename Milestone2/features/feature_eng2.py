@@ -157,13 +157,7 @@ def feature_eng2_raw(DATA_PATH, year, season, game_id):
     df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
     df_eng2['gameSeconds'] = df['period']*(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
 
-    # Adding remaining period time
-    df_eng2['RemainingPeriodTime'] = 60 * 20 - (df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
-
     df_eng2 = df_eng2.drop(columns=['minutes', 'seconds'])
-
-    # Determining if current period is overtime
-    df_eng2[['OT_Period']] = (df_eng2[['period']] > 3).astype(int)
 
     # Copying df and shifting by one below to get previous play data
     df_copy = df
@@ -302,7 +296,7 @@ def feature_eng2_cleaned(path, year) -> pd.DataFrame:
     df['is_goal'] = df.pop('is_goal')
     return df[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away', 'home_pts', 'away_pts', 'diff_pts', 'is_goal']]
 
-def get_train_data(DATA_PATH: str):
+def get_train_data(DATA_PATH: str, return_optional_features):
     """
     Arguments:
         DATA_PATH (str): path to data
@@ -315,9 +309,13 @@ def get_train_data(DATA_PATH: str):
     data = pd.concat([data, feature_eng2_cleaned(DATA_PATH, 2018)], ignore_index=True)
     data = pd.concat([data, feature_eng2_cleaned(DATA_PATH, 2019)], ignore_index=True)
 
-    data.to_csv(DATA_PATH + '/clean_train_data.csv')
+    if return_optional_features:
+        data.to_csv(DATA_PATH + '/clean_train_data_with_optional.csv')
+    else:
+        data = data.drop(['away_pts', 'diff_pts', 'home_pts'], axis=1)
+        data.to_csv(DATA_PATH + '/clean_train_data.csv')
 
-def get_test_data(DATA_PATH, season, ret_optional_features):
+def get_test_data(DATA_PATH, season, return_optional_features):
     """
         Arguments:
             DATA_PATH (str): path to data
@@ -326,14 +324,17 @@ def get_test_data(DATA_PATH, season, ret_optional_features):
 
     """
     data = season_integration_eng2(DATA_PATH, 2020, season)
-    if ret_optional_features:
-        data = data[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away', 'home_pts', 'away_pts', 'diff_pts', 'is_goal']]
+    data = data[['gameSeconds', 'period', 'x_coordinate', 'y_coordinate', 'shotDistance', 'shotAngle', 'shotType',
+                 'LastEventType', 'Last_x_coordinate', 'Last_y_coordinate', 'timeFromLastEvent', 'DistanceLastEvent',
+                 'Rebound', 'changeShotAngle', 'speed', 'time_since_pp', 'no_players_home', 'no_players_away',
+                 'home_pts', 'away_pts', 'diff_pts', 'is_goal']]
+    if return_optional_features:
         data.to_csv(DATA_PATH + f'/clean_test_data_{season}_with_optional.csv')
     else:
-        data = data[['gameSeconds','period','x_coordinate','y_coordinate','shotDistance','shotAngle','shotType','LastEventType','Last_x_coordinate','Last_y_coordinate','timeFromLastEvent','DistanceLastEvent','Rebound','changeShotAngle','speed','time_since_pp','no_players_home','no_players_away', 'is_goal']]
+        data = data.drop(['away_pts', 'diff_pts', 'home_pts'], axis=1)
         data.to_csv(DATA_PATH + f'/clean_test_data_{season}.csv')
 
-def get_full_test_data(DATA_PATH, season):
+def get_full_test_data(DATA_PATH, season, return_optional_features):
     """
         Arguments:
             DATA_PATH (str): path to data
@@ -343,9 +344,13 @@ def get_full_test_data(DATA_PATH, season):
     """
     data = season_integration_eng2(DATA_PATH, 2020, season)
 
-    data.to_csv(DATA_PATH + f'/full_test_data_{season}.csv')
+    if return_optional_features:
+        data.to_csv(DATA_PATH + f'/full_test_data_{season}_with_optional.csv')
+    else:
+        data = data.drop(['away_pts', 'diff_pts', 'home_pts'], axis=1)
+        data.to_csv(DATA_PATH + f'/full_test_data_{season}.csv')
 
-def get_full_train_data(DATA_PATH: str):
+def get_full_train_data(DATA_PATH: str, return_optional_features):
     """
     Arguments:
         DATA_PATH (str): path to data
@@ -358,31 +363,35 @@ def get_full_train_data(DATA_PATH: str):
     data = pd.concat([data, feature_eng2(DATA_PATH, 2018)], ignore_index=True)
     data = pd.concat([data, feature_eng2(DATA_PATH, 2019)], ignore_index=True)
 
-    data.to_csv(DATA_PATH + '/full_train_data.csv')
+    if return_optional_features:
+        data.to_csv(DATA_PATH + '/full_train_data_with_optional.csv')
+    else:
+        data = data.drop(['away_pts', 'diff_pts', 'home_pts'], axis=1)
+        data.to_csv(DATA_PATH + '/full_train_data.csv')
 
 if __name__ == "__main__":
     PATH = '../../IFT6758_Data'
-    dataset = input('Enter train for parsing train data and test for parsing test data: ').strip()
-    subset_or_full = input('Enter subset for only feature engineering 2 data and full for all data: ').strip()
 
+    dataset = input('Enter train for parsing train data and test for parsing test data: ').strip()
     assert dataset in ['train', 'test']
+
+    subset_or_full = input('Enter subset for only feature engineering 2 data and full for all data: ').strip()
     assert subset_or_full in ['subset', 'full']
+
+    optional_features = input('Enter yes for optional features. Otherwise enter no: ').strip()
+    assert optional_features in ['yes', 'no']
 
     if dataset == 'test':
         season = input('Enter season as regular or playoffs: ').strip()
         assert season in ['regular', 'playoffs']
 
-        if subset_or_full == 'subset':
-            optional_features = input('Enter yes for optional features. Otherwise enter no: ').strip()
-            assert optional_features in ['yes', 'no']
-
     if dataset == 'train':
         if subset_or_full == 'subset':
-            get_train_data(PATH)
+            get_train_data(PATH, optional_features == 'yes')
         else:
-            get_full_train_data(PATH)
+            get_full_train_data(PATH, optional_features == 'yes')
     else:
         if subset_or_full == 'subset':
             get_test_data(PATH, season, optional_features == 'yes')
         else:
-            get_full_test_data(PATH, season)
+            get_full_test_data(PATH, season, optional_features == 'yes')
