@@ -9,7 +9,7 @@ import matplotlib.ticker as ticker
 
 
 def plot_ROC(y_val,pred_probs):
-     """
+    """
     Generates and displays a Receiver Operating Characteristic (ROC) curve with the corresponding Area Under 
     the Curve (AUC) metric from true binary labels and prediction probabilities. Optionally, it can save the
     plot to a file.
@@ -65,7 +65,7 @@ def plot_ROC(y_val,pred_probs):
     ##plt.show()
     
 def calc_percentile(pred_probs, y_val):
-        """
+    """
     Calculates the percentile rank of predicted probabilities and merges it with the actual goal labels.
 
     This function takes the predicted probabilities for the positive class (goals) and the actual 
@@ -99,7 +99,7 @@ def calc_percentile(pred_probs, y_val):
     return df_percentile
 
 def goal_rate(df_percentile):
-       """
+    """
     Calculates the goal rate per percentile bin and returns a DataFrame with these rates.
 
     This function takes a DataFrame containing the percentile ranks of predicted probabilities 
@@ -154,7 +154,7 @@ def goal_rate(df_percentile):
     return goal_rate_df
 
 def plot_goal_rates(goal_rate_df):
-          """
+    """
     Plots the goal rates against shot probability model percentiles.
 
     This function takes a DataFrame containing goal rates and their corresponding percentile bins
@@ -170,7 +170,7 @@ def plot_goal_rates(goal_rate_df):
       of the percentile bin.
     Returns:
     None
-      """ 
+    """ 
 
     plt.figure(figsize=(8,6))
     
@@ -198,7 +198,7 @@ def plot_goal_rates(goal_rate_df):
     #plt.show()
     
 def plot_cumulative_goal_rates(df_percentile):
-        """
+    """
     Plots the cumulative distribution of goals over the percentile ranks of predicted probabilities.
 
     The function filters the input DataFrame for actual goals and uses the empirical cumulative 
@@ -240,7 +240,7 @@ def plot_cumulative_goal_rates(df_percentile):
     #plt.show()
     
 def plot_calibration_curve_prediction(y_val, pred_probs):
-	   """
+    """
     Plots a calibration curve for the predicted probabilities against the actual outcomes.
 
     The calibration curve, also known as a reliability diagram, shows the relationship between 

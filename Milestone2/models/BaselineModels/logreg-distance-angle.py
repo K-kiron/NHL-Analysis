@@ -12,7 +12,7 @@ import matplotlib.ticker as ticker
 
 # Read in data and assign X and y
 data = pd.read_csv('../../../IFT6758_Data/train_data.csv', index_col=0)
-X = data[['shot_distance', 'shot_angle' ]]
+X = data[['shotDistance', 'shotAngle' ]]
 X = X.rename({'shotDistance': 'distanceFromNet', 'shotAngle': 'angleFromNet'}, axis=1)
 X.interpolate(method='linear', inplace=True)
 y = data[['is_goal']]
@@ -21,7 +21,7 @@ X = X.dropna()
 y = y.loc[X.index]
 
 def Log_reg(X, y, feature_list):
-        """
+    """
     Trains and validates a logistic regression model using a specified list of features.
     
     This function splits the input data into training and validation sets, 
@@ -303,7 +303,7 @@ def plot_goal_rate_all_feat(X, y):
 plot_goal_rate_all_feat(X,y)
 
 def plot_cumulative_rate_all_feat(X, y):
-   """
+    """
     Plots the empirical cumulative distribution function (ECDF) of goals for logistic regression models
     trained on different sets of features, including a comparison to a random baseline.
 
