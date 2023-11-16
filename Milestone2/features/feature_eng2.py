@@ -6,11 +6,11 @@ import numpy as np
 import re
 import sys
 
-DATA_PATH = '../../IFT6758_Data/'
-PROJECT_PATH = '../../Milestone2/'
+#DATA_PATH = '../../IFT6758_Data/'
+#PROJECT_PATH = '../../Milestone2/'
 
-#DATA_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/Milestone_1/data"
-#PROJECT_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/"
+DATA_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/Milestone_1/data"
+PROJECT_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/"
 
 sys.path.append(PROJECT_PATH)
 from features.tidy_data import tidy_data
@@ -158,7 +158,14 @@ def feature_eng2_raw(DATA_PATH, year, season, game_id):
     # Converting periodTime (mm:ss) to gameSeconds (s), i.e., time (s) since game start!
     df_eng2[['minutes', 'seconds']] = df_eng2['periodTime'].str.split(':', expand=True)
     df_eng2['gameSeconds'] = df['period']*(df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
+
+    # Adding remaining period time
+    df_eng2['RemainingPeriodTime'] = 60 * 20 - (df_eng2['minutes'].astype(int) * 60 + df_eng2['seconds'].astype(int))
+
     df_eng2 = df_eng2.drop(columns=['minutes', 'seconds'])
+
+    # Determining if current period is overtime
+    df_eng2[['OT_Period']] = (df_eng2[['period']] > 3).astype(int)
 
     # Copying df and shifting by one below to get previous play data
     df_copy = df
@@ -215,7 +222,25 @@ def feature_eng2_raw(DATA_PATH, year, season, game_id):
     df_eng2['no_players_away'] = no_players_away
     df_eng2['is_goal'] = df_eng2.apply(is_goal, axis=1)
     
-    
+
+    # Keeping track of number of goals scored by home and away teams
+    df_eng2['home_pts'] = 0
+    df_eng2['away_pts'] = 0
+
+    # Grouping by game_id to be sure to keep track of points within a given game
+    # Summing goals scored by the home and away teams, respectively
+    home_pts_cumsum = df_eng2[df_eng2['team'] == df_eng2['homeTeam']].groupby(['game_id', 'homeTeam'])['is_goal'].cumsum()
+    away_pts_cumsum = df_eng2[df_eng2['team'] == df_eng2['awayTeam']].groupby(['game_id', 'awayTeam'])['is_goal'].cumsum()
+
+    df_eng2 = pd.merge(df_eng2, home_pts_cumsum, left_index=True, right_index=True, suffixes=('', '_home_cumsum'), how='left')
+    df_eng2 = pd.merge(df_eng2, away_pts_cumsum, left_index=True, right_index=True, suffixes=('', '_away_cumsum'), how='left')
+    df_eng2['home_pts'] = df_eng2.groupby(['game_id', 'homeTeam'])['is_goal_home_cumsum'].ffill().fillna(0).astype(int)
+    df_eng2['away_pts'] = df_eng2.groupby(['game_id', 'awayTeam'])['is_goal_away_cumsum'].ffill().fillna(0).astype(int)
+    df_eng2.drop(['is_goal_home_cumsum', 'is_goal_away_cumsum'], axis=1, inplace=True)
+
+    # Computing goal differentials
+    df_eng2['diff_pts'] = df_eng2['home_pts'] - df_eng2['away_pts']
+
     return df_eng2
 
 # Get json files in parent directory
