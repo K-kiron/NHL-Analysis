@@ -136,7 +136,7 @@ def bin_by_distance(df: pd.DataFrame):
     plt.figure(figsize=(8, 5))
     plt.hist(df_no_goal['shotDistance'], bins=bins, alpha=0.5, label='no-goal', edgecolor='black', linewidth=1.2)
     plt.hist(df_goal['shotDistance'], bins=bins, alpha=0.5, label='goal', edgecolor='black', linewidth=1.2)
-    plt.xlabel('Distance from the gate')
+    plt.xlabel('Distance from the goalpost')
     plt.ylabel('Shot counts')
     plt.title('Shot counts by distance')
     plt.legend(loc='upper right')
@@ -182,7 +182,7 @@ def joint_plot(df: pd.DataFrame):
     """
     plt.figure(figsize=(8, 5))
     sns.jointplot(x='shotDistance', y='shotAngle', data=df, kind='hist', bins=20)
-    plt.xlabel('Distance from the gate')
+    plt.xlabel('Distance from the goalpost')
     plt.ylabel('Shot angle')
     plt.show()
 
@@ -208,7 +208,7 @@ def prob_by_distance(df: pd.DataFrame):
 
     plt.figure(figsize=(8, 5))
     df_goal_prob.plot(kind='bar', x='distance_bin', y='is_goal')
-    plt.xlabel('Distance from the gate')
+    plt.xlabel('Distance from the goalpost')
     plt.ylabel('Goal rate')
     plt.title('Goal rate by distance')
     plt.show()
@@ -262,7 +262,7 @@ def check_emptyNet(df: pd.DataFrame):
     plt.figure(figsize=(8, 5))
     plt.hist(df_not_emptyNet['shotDistance'], bins=bins, alpha=0.5, label='non-empty net', edgecolor='black', linewidth=1.2, color='grey')
     plt.hist(df_emptyNet['shotDistance'], bins=bins, alpha=0.5, label='empty net', edgecolor='black', linewidth=1.2, color='lightgreen')
-    plt.xlabel('Distance from the gate')
+    plt.xlabel('Distance from the goalpost')
     plt.ylabel('Shot counts')
     plt.title('Shot counts by distance')
     plt.legend(loc='upper right')
