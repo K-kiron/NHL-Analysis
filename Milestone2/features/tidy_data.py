@@ -46,26 +46,34 @@ def tidy_data(path, year, season, game_id):
                 strength = None
                 
             if team == homeTeam:
-                if period%2 != 0:
-                    goalLocation = 'Left'
-                else:
-                    goalLocation = 'Right'
+                if period > 3:
+                    period = 4
+                try:
+                    goalLocation = game_data['liveData']['linescore']['periods'][period-1]['home']['rinkSide']
+                except KeyError:
+                    goalLocation = None
                     
             elif team == awayTeam:
-                if period%2 != 0:
-                    goalLocation = 'Right'
-                else:
-                    goalLocation = 'Left'
+                if period > 3:
+                    period = 4
+                try:
+                    goalLocation = game_data['liveData']['linescore']['periods'][period-1]['away']['rinkSide']
+                except KeyError:
+                    goalLocation = None
                     
-            if goalLocation == 'Left' and y_coordinate is not None:
-                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
-            elif goalLocation == 'Right' and y_coordinate is not None:
+            if goalLocation == 'left' and y_coordinate is not None:
                 shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate - 89)))
+            elif goalLocation == 'right' and y_coordinate is not None:
+                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
+            elif goalLocation == None:
+                shotangle = None
                 
-            if goalLocation == 'Left' and y_coordinate is not None:
-                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate + 89)**2)
-            elif goalLocation == 'Right' and y_coordinate is not None:
+            if goalLocation == 'left' and y_coordinate is not None:
                 shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate - 89)**2)
+            elif goalLocation == 'right' and y_coordinate is not None:
+                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate + 89)**2)
+            elif goalLocation == None:
+                shotDistance = None
             
             shot_data = {
                 'game_id': game_id,
@@ -88,6 +96,10 @@ def tidy_data(path, year, season, game_id):
                 'shotDistance': shotDistance
             }
 
+            # if shotDistance is not None and shotangle is not None:
+            #     if shotDistance > 100:
+            #         print(shotDistance)
+
             shot_data_temp.append(shot_data)
             
-    return pd.DataFrame(shot_data_temp)
+    return pd.DataFrame(shot_data_temp)#.dropna()
