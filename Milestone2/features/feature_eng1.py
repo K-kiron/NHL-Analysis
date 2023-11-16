@@ -88,8 +88,9 @@ def init_distance_bins(df: pd.DataFrame) -> pd.DataFrame:
     max_distance = df['shotDistance'].max()
     min_distance = 0
 
-    # divide the distance into 20 bins
+    # divide the distance into 20 bins, and round to the nearest integer
     bins = np.linspace(min_distance, max_distance, 20)
+    bins = np.round(bins).astype(int)
 
     df['distance_bin'] = pd.cut(df['shotDistance'], bins=bins)
     return df
@@ -109,8 +110,9 @@ def init_angle_bins(df: pd.DataFrame) -> pd.DataFrame:
     max_angle = 90
     min_angle = 0
 
-    # divide the distance into 20 bins
+    # divide the distance into 20 bins, and round to the nearest integer
     bins = np.linspace(min_angle, max_angle, 20)
+    bins = np.round(bins).astype(int)
         
     df['angle_bin'] = pd.cut(df['shotAngle'], bins=bins)
     return df
