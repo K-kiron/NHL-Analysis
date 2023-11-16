@@ -1,4 +1,5 @@
 # from comet_ml import Experiment
+import pandas as pd
 import numpy as np
 import os
 import sys
@@ -6,7 +7,6 @@ import sys
 
 DATA_PATH = '../../IFT6758_Data/'
 PROJECT_PATH = '../../Milestone2/'
-
 
 sys.path.append(PROJECT_PATH)
 from features.tidy_data import tidy_data
@@ -72,7 +72,10 @@ def generate_train_set(DATA_PATH) -> pd.DataFrame:
 
     return train_df
 
-
+# Call the function to generate the DataFrame
+train_df = generate_train_set(DATA_PATH)
+# Export train_data and test_data as csv
+train_df.to_csv('train_data.csv')
 
 
 def init_distance_bins(df: pd.DataFrame) -> pd.DataFrame:
