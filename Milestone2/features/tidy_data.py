@@ -5,34 +5,17 @@ import pandas as pd
 import numpy as np
 import math
 
-def tidy_data(path: str, year: int, season: str, game_id: int) -> pd.DataFrame:
-    '''
-    Arguments:
-        path (str): DATA_PATH
-        year (int): year in which the game was played
-        season (str): season in which the game was played
-        game_id (int): internal NHL game identification
-
-    Returns: DataFrame containing game data for all events
-                All features are listed below under shot_data
-        
-    '''
-
-    # Loading json file
+def tidy_data(path, year, season, game_id):
     with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
         game_data = json.load(file)
     
     shot_data_temp = []
     
-    # Loading play Data
     playData = game_data['liveData']['plays']['allPlays']
     homeTeam = game_data['gameData']['teams']['home']['triCode']
     awayTeam = game_data['gameData']['teams']['away']['triCode']
-
-    # Looping through events
     for i in range(len(playData)):
         eventData = playData[i]
-        # Get data for shot/goal events
         if eventData['result']['event'] == 'Shot' or eventData['result']['event'] == 'Goal':
             game_id = game_data['gameData']['game']['pk']
             periodType = eventData['about']['periodType']
@@ -63,29 +46,35 @@ def tidy_data(path: str, year: int, season: str, game_id: int) -> pd.DataFrame:
                 strength = None
                 
             if team == homeTeam:
-                if period%2 != 0:
-                    goalLocation = 'Left'
-                else:
-                    goalLocation = 'Right'
+                if period > 3:
+                    period = 4
+                try:
+                    goalLocation = game_data['liveData']['linescore']['periods'][period-1]['home']['rinkSide']
+                except KeyError:
+                    goalLocation = None
                     
             elif team == awayTeam:
-                if period%2 != 0:
-                    goalLocation = 'Right'
-                else:
-                    goalLocation = 'Left'
-            
-            # Computing shot angle based on goal location
-            if goalLocation == 'Left' and y_coordinate is not None:
-                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
-            elif goalLocation == 'Right' and y_coordinate is not None:
+                if period > 3:
+                    period = 4
+                try:
+                    goalLocation = game_data['liveData']['linescore']['periods'][period-1]['away']['rinkSide']
+                except KeyError:
+                    goalLocation = None
+                    
+            if goalLocation == 'left' and y_coordinate is not None:
                 shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate - 89)))
+            elif goalLocation == 'right' and y_coordinate is not None:
+                shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate + 89)))
+            elif goalLocation == None:
+                shotangle = None
                 
-            if goalLocation == 'Left' and y_coordinate is not None:
-                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate + 89)**2)
-            elif goalLocation == 'Right' and y_coordinate is not None:
+            if goalLocation == 'left' and y_coordinate is not None:
                 shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate - 89)**2)
+            elif goalLocation == 'right' and y_coordinate is not None:
+                shotDistance = np.sqrt(y_coordinate**2 + (x_coordinate + 89)**2)
+            elif goalLocation == None:
+                shotDistance = None
             
-            # Storing features
             shot_data = {
                 'game_id': game_id,
                 'homeTeam': homeTeam,
@@ -107,6 +96,10 @@ def tidy_data(path: str, year: int, season: str, game_id: int) -> pd.DataFrame:
                 'shotDistance': shotDistance
             }
 
+            # if shotDistance is not None and shotangle is not None:
+            #     if shotDistance > 100:
+            #         print(shotDistance)
+
             shot_data_temp.append(shot_data)
             
-    return pd.DataFrame(shot_data_temp)
+    return pd.DataFrame(shot_data_temp)#.dropna()
