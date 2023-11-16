@@ -23,7 +23,7 @@ X = X.dropna()
 y = y.loc[X.index]
 
 def Log_reg(X, y, feature_list):
-        """
+    """
     Trains and validates a logistic regression model using a specified list of features.
     
     This function splits the input data into training and validation sets, 
@@ -68,7 +68,7 @@ def Log_reg(X, y, feature_list):
     return X_val, y_val, y_pred, accuracy,  pred_probs
 
 def plot_ROC(y_val,probs,title = False, savename=False):
-     """
+    """
     Generates and displays a Receiver Operating Characteristic (ROC) curve with the corresponding Area Under 
     the Curve (AUC) metric from true binary labels and prediction probabilities. Optionally, it can save the
     plot to a file.
@@ -206,7 +206,7 @@ def goal_rate(df_percentile):
     return goal_rate_df
 
 def plot_goal_rates(goal_rate_df):
-       """
+    """
     Plots the goal rates against shot probability model percentiles.
 
     This function takes a DataFrame containing goal rates and their corresponding percentile bins
@@ -222,7 +222,7 @@ def plot_goal_rates(goal_rate_df):
       of the percentile bin.
     Returns:
     None
-      """ 
+    """ 
     ax = plt.gca()
     ax.grid()
 
@@ -246,7 +246,7 @@ def plot_goal_rates(goal_rate_df):
     plt.show()
 
 def plot_cumulative_goal_rates(df_percentile):
-        """
+    """
     Plots the cumulative distribution of goals over the percentile ranks of predicted probabilities.
 
     The function filters the input DataFrame for actual goals and uses the empirical cumulative 
@@ -287,7 +287,7 @@ def plot_cumulative_goal_rates(df_percentile):
     plt.show()
 
 def plot_calibration_curve_prediction(y_val, pred_probs):
-	   """
+    """
     Plots a calibration curve for the predicted probabilities against the actual outcomes.
 
     The calibration curve, also known as a reliability diagram, shows the relationship between 
