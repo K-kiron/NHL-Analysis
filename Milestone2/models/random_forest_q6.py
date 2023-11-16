@@ -50,7 +50,7 @@ from models.BaselineModels.plots import *
 
 # Loading data and pre-processing
 #X = pd.read_csv(DATA_PATH + '/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/data/clean_train_data.csv', index_col=0)
-X = pd.read_csv('/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/data/clean_train_data.csv', index_col=0)
+X = pd.read_csv(DATA_PATH+'/clean_train_data.csv', index_col=0)
 
 has_nan = X.isna().any().any()
 
