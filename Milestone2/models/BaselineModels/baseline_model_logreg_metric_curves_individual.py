@@ -15,7 +15,6 @@ import sys
 # Read in data and assign X and y
 data = pd.read_csv('../../../IFT6758_Data/train_data.csv', index_col=0)
 print(data.head())
-#data.dropna(inplace=True)
 X = data[['shotDistance']]
 y = data[['is_goal']]
 # Drop rows with NaN values from both X and y
@@ -49,7 +48,6 @@ def Log_reg(X, y, feature_list):
     - The function prints the model's accuracy on the validation set.
     
     """
-    #print(X[feature_list])
     X_train,X_val,y_train,y_val = train_test_split(X[feature_list], y, test_size=0.2, random_state=42)
 
     # Logistic regression model fitting
@@ -60,9 +58,7 @@ def Log_reg(X, y, feature_list):
     # Predict on validation set
     y_pred = clf.predict(X_val)
     accuracy = metrics.accuracy_score(y_val, y_pred)
-    #print(f'Accuracy score is {accuracy}')
 
-    #X_test_pred_proba = clf.predict_proba(X_test)
     pred_probs = clf.predict_proba(X_val)
 
     return X_val, y_val, y_pred, accuracy,  pred_probs
@@ -280,7 +276,6 @@ def plot_cumulative_goal_rates(df_percentile):
     ax.set_xlabel('Shot probability model percentile', fontsize=16)
     ax.set_ylabel('Proportion', fontsize=16)
     ax.set_title(f"Cumulative % of Goals")
-    #plt.legend(loc='lower right')
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
     ax.legend(['Model 1'])
 
@@ -315,13 +310,10 @@ def plot_calibration_curve_prediction(y_val, pred_probs):
 #feature_list = ['distanceFromNet', 'angleFromNet']
 feature_list = ['shotDistance']
 X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, feature_list)
-#X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, ['angleFromNet'])
 print(f'Accuracy score is {accuracy}')
-#plot_ROC(y_val, pred_probs, 'ROC curve for distance')
 print(pred_probs)
 print(y_val)
 
-# Look at where it's all gone wrong
 X_val_compar = X_val.copy()
 X_val_compar['preds'] = y_pred
 X_val_compar['actual'] = y_val['is_goal']

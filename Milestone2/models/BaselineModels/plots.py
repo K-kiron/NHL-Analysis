@@ -36,7 +36,6 @@ def plot_ROC(y_val,pred_probs):
     probs_isgoal = pred_probs[:,1]
     fpr, tpr, _ = roc_curve(y_val,probs_isgoal)
     roc_auc = auc(fpr,tpr)
-    #plt.figure()
     plt.figure(figsize=(8,6))
     lw = 2
     plt.plot(
@@ -62,7 +61,6 @@ def plot_ROC(y_val,pred_probs):
     ax.set_facecolor('0.95')
     plt.tight_layout()
     plt.savefig('roc_curve.png')
-    ##plt.show()
     
 def calc_percentile(pred_probs, y_val):
     """
@@ -120,7 +118,7 @@ def goal_rate(df_percentile):
     rate_list = []
     
     # Find total number of goals
-    #total_goals = df_percentile['isGoal'].value_counts()[1]
+    #total_goals = df_percentile['is_goal'].value_counts()[1]
    
     
     bin_width = 5
@@ -195,7 +193,6 @@ def plot_goal_rates(goal_rate_df):
     plt.title('Goal Rate', fontsize=16)
     plt.ylabel('Goals / (Shots+Goals)%', fontsize=16)
     plt.savefig('goal_rate_plot.png')
-    #plt.show()
     
 def plot_cumulative_goal_rates(df_percentile):
     """
@@ -233,11 +230,9 @@ def plot_cumulative_goal_rates(df_percentile):
     ax.set_xlabel('Shot probability model percentile', fontsize=16)
     ax.set_ylabel('Proportion', fontsize=16)
     ax.set_title(f"Cumulative % of Goals", fontsize=16)
-    #plt.legend(loc='lower right')
     plt.grid(color='gray', linestyle='--', linewidth=0.5)
     plt.savefig('cumulative_goal_rate.png')
     ax.legend(['Logistic Regression'])
-    #plt.show()
     
 def plot_calibration_curve_prediction(y_val, pred_probs):
     """
@@ -272,4 +267,3 @@ def plot_calibration_curve_prediction(y_val, pred_probs):
     ax.xaxis.set_major_locator(ticker.MultipleLocator(0.1))
     ax.yaxis.set_major_locator(ticker.MultipleLocator(0.1))
     plt.savefig('calibration_curve.png')
-    #plt.show()

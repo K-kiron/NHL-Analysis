@@ -12,9 +12,6 @@ from sklearn.linear_model import LogisticRegression
 from plots import *
 
 #COMET_API_KEY='UuHTEgYku8q9Ww3n13pSEgC8d'
-# Create an experiment with your api key
-
-# set an experiment name for basemodel
 
 now = datetime.datetime.now()
 
@@ -24,7 +21,6 @@ data = data[['shotDistance', 'shotAngle','is_goal' ]]
 data.dropna(inplace=True)
 X = data[['shotDistance', 'shotAngle' ]]
 X = X.rename({'shotDistance': 'distanceFromNet', 'shotAngle': 'angleFromNet'}, axis=1)
-#X.interpolate(method='linear', inplace=True)
 y = data[['is_goal']]
 
 def Log_reg(X, y, i):
@@ -56,14 +52,12 @@ def Log_reg(X, y, i):
     feature_list = (['distanceFromNet'], ['angleFromNet'], ['distanceFromNet', 'angleFromNet']  )
     feature_name_list = ['distance', 'angle', 'distance_angle']
     
-    #Select 0,1,2 for 'Distance from Net', 'Angle from Net', 'Distance and Angle from Net'features.
     experiment = Experiment(
         api_key="COMET_API_KEY",  
         project_name="nhl-project-b10",
         workspace="ift6758b-project-b10",
         auto_output_logging="simple",
         )
-    #i = 1
     features = feature_list[i]
     feature_name = feature_name_list[i]
         
@@ -131,8 +125,6 @@ def Log_reg(X, y, i):
                     "recall": recall,
                     "roc_auc": roc_auc}
 
-    #experiment.log_dataset_hash(X_train)
-    #experiment.log_parameters(params)
     experiment.log_metrics(metrics_dict)
     experiment.log_confusion_matrix(matrix=cf_matrix)
     experiment.log_image('roc_curve.png', name= experiment_name + '_roc_curve.png', overwrite=True)
@@ -145,7 +137,6 @@ def Log_reg(X, y, i):
     
 
 if __name__ == '__main__':
-    #Select 0,1,2 for 'Distance from Net', 'Angle from Net', 'Distance and Angle from Net'features.
     i = 0
     while i<3 : 
         pred_probs, accuracy,f1_score, precision, recall, roc_auc, cf_matrix = Log_reg(X, y, i)

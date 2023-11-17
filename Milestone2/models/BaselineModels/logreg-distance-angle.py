@@ -48,7 +48,6 @@ def Log_reg(X, y, feature_list):
     
     """
 
-    #print(X[feature_list])
     X_train,X_val,y_train,y_val = train_test_split(X[feature_list], y, test_size=0.2, random_state=42)
 
     # Logistic regression model fitting
@@ -245,7 +244,6 @@ def plot_goal_rate_all_feat(X, y):
     feature_color_list = ['red', 'blue', 'green']
     plot_label_list = ['Distance from Net', 'Angle from Net', 'Distance and Angle from Net']
 
-    #if model_name == 'LR':
     for i, feature in enumerate(feature_list):
 
         X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, feature)
@@ -329,7 +327,6 @@ def plot_cumulative_rate_all_feat(X, y):
     feature_color_list = ['red', 'blue', 'green']
     plot_label_list = ['Distance from Net', 'Angle from Net', 'Distance and Angle from Net']
 
-    #if model_name == 'LR':
     for i, feature in enumerate(feature_list):
 
         X_val, y_val, y_pred, accuracy,  pred_probs = Log_reg(X, y, feature)
@@ -345,7 +342,6 @@ def plot_cumulative_rate_all_feat(X, y):
 
 
 
-    #Random Baseline
     probs_isgoal = pred_probs[:,1]
     baseline_is_goal = np.random.uniform(0,1,probs_isgoal.shape[0])
     no_baseline_goal = np.array([(1-i) for i in baseline_is_goal])
@@ -413,7 +409,6 @@ def plot_calibration_all_feat(X, y):
 
     feature_list.append('RandomBaseline')
 
-    #if model_name == 'LR':
     for i, feature in enumerate(feature_list):
 
         if feature != 'RandomBaseline':
