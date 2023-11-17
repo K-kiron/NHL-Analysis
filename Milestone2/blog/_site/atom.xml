@@ -4,7 +4,7 @@
  <title>NHL Analytics Blog</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2023-11-16T23:49:40-05:00</updated>
+ <updated>2023-11-16T23:55:42-05:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name></name>
@@ -275,21 +275,6 @@ the calibration plot maintains the same behaviour. This can be due to the fact t
 &lt;p&gt;All models perform worse on the test set for playoff season as well, as compared to the validation sets. Moreover, their performance is a little worse than what it was for the regular season test set. 
 This is evident from the fact that the area under ROC curves for the classifier is lesser as compared to the regular season test set. Furthermore, the calibration plots in this case also have significant 
 vertical deviations indicating a substantial discrepancy between the predicted probabilities and the actual outcomes at higher probability ranges.&lt;/p&gt;
-&lt;blockquote&gt;
-  &lt;blockquote&gt;
-    &lt;blockquote&gt;
-      &lt;blockquote&gt;
-        &lt;blockquote&gt;
-          &lt;blockquote&gt;
-            &lt;blockquote&gt;
-              &lt;p&gt;Stashed changes&lt;/p&gt;
-            &lt;/blockquote&gt;
-          &lt;/blockquote&gt;
-        &lt;/blockquote&gt;
-      &lt;/blockquote&gt;
-    &lt;/blockquote&gt;
-  &lt;/blockquote&gt;
-&lt;/blockquote&gt;
 </content>
  </entry>
  
