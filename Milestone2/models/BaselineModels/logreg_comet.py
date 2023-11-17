@@ -11,7 +11,6 @@ from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 from plots import *
 
-#COMET_API_KEY='UuHTEgYku8q9Ww3n13pSEgC8d'
 
 now = datetime.datetime.now()
 
