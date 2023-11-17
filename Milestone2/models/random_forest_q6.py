@@ -11,27 +11,14 @@ import pandas as pd
 import sklearn
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_selection import RFECV
-from sklearn import metrics
+
 from sklearn.metrics import *
 from sklearn.model_selection import train_test_split
-from imblearn.ensemble import BalancedRandomForestClassifier
 
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.feature_selection import SelectFromModel
 
-
-# In[4]:
-
-
 print(sklearn.__version__)
-
-
-# In[5]:
-
-
-#DATA_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/data"
-#PROJECT_PATH = "/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/"
 
 DATA_PATH = '../../IFT6758_Data/'
 PROJECT_PATH = '../../Milestone2/'
@@ -43,21 +30,10 @@ from features.feature_eng2 import *
 from features.tidy_data import *
 from features.feature_eng1 import *
 from visualizations.simple_visualization import *
-from models.BaselineModels.plots import *
-
-
-# In[6]:
-
-
-#get_train_data(DATA_PATH)
-
-
-# In[7]:
-
+from models.generate_plots import *
 
 # Loading data and pre-processing
 X = pd.read_csv(DATA_PATH + '/clean_train_data.csv', index_col=0)
-#X = pd.read_csv('/Users/tristanmartin/Desktop/UdeM_PhD/Cours/A2023/IFT6758/Project/IFT6758B-Project-B10-main-2/Milestone2/data/clean_train_data.csv', index_col=0)
 
 has_nan = X.isna().any().any()
 
@@ -85,10 +61,6 @@ boolean_cols = X.select_dtypes([bool]).columns
 X[boolean_cols] = X[boolean_cols].astype(int)
 X = X.reset_index(drop=True)
 
-
-# In[9]:
-
-
 X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
 
 rf = RandomForestClassifier(random_state=42)
@@ -97,24 +69,16 @@ sfm = SelectFromModel(rf)
 X_res = sfm.fit_transform(X_train, y_train)
 X_val_selected = sfm.transform(X_val)
 
-
-# In[20]:
-
-
 dropped_columns = X_train.columns[~sfm.get_support()]
 kept_columns = X_train.columns[sfm.get_support()] 
 print(dropped_columns)
 print(kept_columns)
 
-
-# In[24]:
-
-
 params = {'n_estimators': 1,
           'learning_rate': 1.0,
           'algorithm': 'SAMME.R',
           'random_state': 42,
-          # Try max_depth = 1,3,5
+          # Try max_depth = 1,3,10
           'base_estimator': RandomForestClassifier(max_depth=1),
           }
 
@@ -127,10 +91,6 @@ model.fit(X_res, y_train, sample_weight=sample_weights[y_train])
 
 y_pred = model.predict(X_val_selected)
 
-
-# In[25]:
-
-
 f1 = f1_score(y_val, y_pred)
 print(f'f1 score: {f1}')
 accuracy = accuracy_score(y_val, y_pred)
@@ -139,10 +99,6 @@ precision = precision_score(y_val, y_pred)
 print(f'precision score: {precision}')
 recall = recall_score(y_val, y_pred)
 print(f'recall score: {recall}')
-
-
-# In[26]:
-
 
 pickle.dump(model, open("ADABoost_rf_max_depth_1.pkl", "wb"))
 experiment = Experiment(
@@ -161,21 +117,13 @@ experiment.set_name('ADABoost Max Depth = 1')
 experiment.log_parameters(params)
 experiment.log_metrics(evaluation)
 
-experiment.log_model('ADABoost Max Depth = 1', 'ADABoost_rf_max_depth_1.pkl') #Edit this
-experiment.end() # Important if you are using jupyter
-
-
-# In[19]:
-
+experiment.log_model('ADABoost Max Depth = 1', 'ADABoost_rf_max_depth_1.pkl')
+experiment.end()
 
 y_pred_prob = model.predict_proba(X_val_selected)[:, 1]
 
 df_percentile =  calc_percentile(y_pred_prob, y_val)
 goal_rate_df = goal_rate(df_percentile)
-
-
-# In[ ]:
-
 
 plot_ROC(y_val, y_pred_prob, 'ROC curve for ADABoost with Max Depth = 10', '6-6a ROC Curve')
 plot_goal_rates(goal_rate_df, 'ADABoost with Max Depth = 10', '6-6b Goal Rate')

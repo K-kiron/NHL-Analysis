@@ -89,591 +89,286 @@
   
   <div class="post">
     <h1 class="post-title">
-      <a href="http://localhost:4000/2023/10/05/milestone-1/">
-        Milestone 1
+      <a href="http://localhost:4000/2023/11/05/milestone-2/">
+        Milestone 2
       </a>
     </h1>
 
-    <span class="post-date">05 Oct 2023</span>
+    <span class="post-date">05 Nov 2023</span>
 
-    <h2 id="1-data-acquisition"><strong>1. Data Acquisition</strong></h2>
+    <h1 id="data-path-rules"><strong>DATA PATH RULES</strong></h1>
+<h2 id="to-run-the-code-correctly-please-follow-the-instructions-below">To run the code correctly, please follow the instructions below:<br /></h2>
+<p>Rename the data folder to ‘IFT6758_Data’ and place the folder under the main(father) path <br />
+<img src="../images/path1_m2.png" alt="path_img" /><br /><img src="../images/path2_m2.png" alt="path_img" /><br /></p>
 
-<p>The play-by-play data was downloaded from the public NHL APIs for Regular season and Playoffs.
-The following NHL endpoint was used to download the data:</p>
-<div class="language-markdown highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://statsapi.web.nhl.com/api/v1/game/[GAME_ID]/feed/live/
-</code></pre></div></div>
-<p>The <strong>GAME_ID</strong> path parameter was constructed for each game in Regular season
-and Playoffs from the <a href="https://gitlab.com/dword4/nhlapi/-/blob/master/stats-api.md#game-ids">unofficial API documentation</a> 
-of NHL APIs for all games in seasons from <strong>2016-17</strong> to <strong>2020-21</strong>.</p>
+<h2 id="1-experiment-tracking"><strong>1. Experiment Tracking</strong></h2>
 
-<p><img src="../images/GAME_ID.png" alt="My image Name" /></p>
+<h3 id="see-the-following-parts">See the following parts.</h3>
 
-<p>The IDs maintain a specific structure which is as follows:</p>
-<ol>
-  <li>All the IDs consist of 10 digits.</li>
-  <li>First 4 digits ascertain the season in which the game was played. 
-For example, all games played in <strong>2018-19</strong> season will start with <strong>2018</strong>.</li>
-  <li>The next 2 digits ascertain the type of game i.e. whether the game was played in 
-<strong>Preseason, Regular season, Playoffs or All Star.</strong></li>
-  <li>The last 4 digits ascertain the specific game number in the season denoted by
-the preceding 2 digits.</li>
-</ol>
+<h2 id="2-feature-engineering-i"><strong>2. Feature Engineering I</strong></h2>
 
-<p>For example, the following Python function was used to generate the game IDs.</p>
+<h3 id="in-this-milestone-we-split-the-raw-data-into-train-validation-and-test-sets">In this milestone, we split the raw data into train, validation and test sets:</h3>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_game_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">season</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">season</span><span class="si">}{</span><span class="n">game_type</span><span class="si">}{</span><span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s">'</span>
-</code></pre></div></div>
+<p><img src="../images/data_split_m2.png" alt="data_split" /></p>
 
-<p>The <strong>game_number</strong> parameter in the above function was constructed a bit 
-differently for Regular season and Playoff games.
+<h3 id="question-1"><strong>Question 1</strong>:</h3>
+
+<p>Here we have calculated shot_distance and shot_angle and added them as new columns to the dataframe. And set the number of bins to 20 for plot.<br />
+As we can see from the chart, although the number of no-goals is significantly higher than the number of goals, the two roughly follow an approximate distribution.</p>
+
+<p><img src="../images/m2_fe1_q1_1.png" alt="fe_q1_1" /></p>
+
+<p>From the graph we can see that shot counts are high at [0,50] but decrease when the distance increases. This is very understandable, because the closer the distance, the easier it is to goal. But the shot counts are also lower at [0,10], due to the fact that it’s too close to the goalpost, and has probably been intercepted by an opposing player before that.</p>
+
+<p><img src="../images/m2_fe1_q1_2.png" alt="fe_q1_2" /></p>
+
+<p>From the image we can see that shot counts show a decreasing trend with increasing angle. This indicates that most of the athletes tend to shoot from the front rather than from a more oblique angle. This is also in line with our common sense: more oblique angles tend to be harder to get a goal.</p>
+
+<p><img src="../images/m2_fe1_q1_3.png" alt="fe_q1_3" /></p>
+
+<p>From the image we can see that the shot counts have a significant density when the distance is close and the angle is close to 0. This is also in line with common sense: shots tend to be concentrated closer to the front of the net.</p>
+
+<h3 id="question-2"><strong>Question 2</strong>:</h3>
+
+<p>In this question instead of histograms, we chose bar charts for plotting. Because for continuous data, the probability of goal at each distance point (or angle point) will only be 1 or 0, the data we get in this case is not meaningful for any study. So we divided the distances and angles into 20 intervals and calculated the goal rate for each interval separately. The results are as follows:</p>
+
+<p><img src="../images/m2_fe1_q2_1.png" alt="fe_q2_1" /></p>
+
+<p>We can see from the graph that the distribution is roughly “U” shaped with a low centre and high ends. The higher goal rate from close range is well understood, whereas the lower goal rate from mid-range may be due to a large number of players congregating in the centre of the pitch, which makes scoring goals less easy. The high rate of goals from further distances may be due to quick counter-attacks where the opposing players have no time to react.</p>
+
+<p><img src="../images/m2_fe1_q2_2.png" alt="fe_q2_2" /></p>
+
+<p>From the image we can see that the goal rate is higher when the angle is close to 0, while the other angles have roughly the same goal rate. This is also aligned with our common sense: shots from the front are more likely to goal.</p>
+
+<h3 id="question-3"><strong>Question 3</strong>:</h3>
+
+<p><img src="../images/m2_fe1_q3.png" alt="fe_q3" /></p>
+
+<p>From the image we can see that the empty net stays at a very low level no matter what the shot distance is. This shows that in most cases the goalkeepers of both teams stay in front of their own net.<br />
+According to our domain knowledge, “it is very rare to score a non-open goal to an opposing team in their own defensive zone”. However, we can see from the picture that there are some non-empty long range goals in the [150,175] zone, which contradicts our domain knowledge and suggests that there may be anomalous data.</p>
+
+<h2 id="3-baseline-models"><strong>3. Baseline Models</strong></h2>
+
+<h3 id="question-1-1"><strong>Question 1</strong>:</h3>
+<p><br />
+The accuracy score of our model on the validation set is approximately 0.906, which means that it correctly predicted about 90.6% of the samples in the validation set.Accuracy is a useful metric when the classes are balanced, but it can be misleading when the class distribution is inbalance.I calculate it by comparing the model’s predictions against the actual outcomes in the validation set. It’s the number of correct predictions divided by the total number of predictions. 
+in summary even  though the accuracy is high in the model but the classifier doesnt work well as our classes are inbalance. this might be due to the feutures that we chosed. goals are not correlated with the distance of the shot from net.<br /></p>
+
+<h3 id="question-2-1"><strong>Question 2</strong>:</h3>
+<p><img src="../images/Q2_1.png" alt="q2_2" /><br />
+The first plot labeled “ROC curve for distance”shows the performance of my classifier in terms of the trade-off between the true positive rate and false positive rate. The area under the curve (AUC) is 0.53, which is slightly better than random guessing (AUC of 0.5). However, an AUC this close to 0.5 indicates that the model does not have a strong discriminatory ability.<br />
+<img src="../images/Q2_2.png" alt="q2_1" /><br />
+The goal rate (#goals / (#no_goals + #goals)) as a function of the shot probability model percentile, i.e. if a value is the 70th percentile, it is above 70% of the data. <br />
+<img src="../images/Q2_3.png" alt="q2_3" /><br />
+third plot is cumulative percentage of goals, which is an empirical cumulative distribution function (ECDF) of the predicted probabilities for the goals. This can help understand the concentration of goals within certain predicted probability ranges.<br />
+<img src="../images/Q2_4.png" alt="q2_4" /><br />
+ is a calibration curve, it show how well the predicted probabilities of the goals are calibrated. The ideal calibration curve would be a straight line at a 45-degree angle. Deviations from this line indicate over- or under-confidence in predictions. if the model is perfectly calibrated, the predicted probabilities of the positive class would match the actual frequency of the positive class.</p>
+<h3 id="question-3-1"><strong>Question 3</strong>:</h3>
+<p><img src="../images/3a_ROC_curves.png" alt="q3_1" /><br />
+models trained using distance from net (distance from net alone or both distance and angle) performed better than those trained using angle from net alone. Models trained on distance tend more towards the top left corner on the ROC plot than do models using angle only, and they have an AUC of 0.65 compared to an AUC of 0.51 for angle. Combining distance and angle adds no increased AUC or curve, suggesting that distance is the defining feature. Indeed, the model using angle only has an AUC matching that of the random baseline. The fact that the ROC curves for angle and random baseline are different despite them having the same AUC values highlights the need to look at data in different ways - in this case, it suggests that the model trained on angle is not simply choosing at random.<br />
+<img src="../images/3b_goal_rates.png" alt="q3_2" /><br />
+This plot shows the goal rates at different shot probability model percentiles. Plotting goal rate as a function of shot probability model percentile gives an indication of whether the model favours shots of a certain probability and hints at what the model thinks is a high-quality shot. The random baseline (Figure 3.3.2), as a straight horizonal line at 10% on the goal rate, gives equal weight to goals of all probabilities. The logistic regression model trained on angle gives a higher goal rate to shots around the 50th model percentile and underweights (assigns a lower goal rate to) shots with high or low model percentiles. Similar to the ROC curves, we see that models using distance from net alone and distance + angle have near-identical curves. Both of these models assign a higher-than-baseline goal rate to shots in the upper model percentile (~ &gt; 70 %) and lower-than-baseline to shots in the lower model percentile (except for shots &lt; 5 %), suggesting that they attribute a higher quality to shots in the upper model percentile.
 <br />
-<br /></p>
-<h3 id="regular-season">Regular Season</h3>
-<p>The ID was fairly straightforward for Regular season games. Here’s how it was constructed:</p>
+<img src="../images/3c_goal_proportions.png" alt="q3_3" /><br />
+The cumulative percentage of goals plot shows how well the models rank the shots by their probability of being a goal. Ideally, a higher proportion of actual goals would be found at higher predicted probabilities.
+The model using both features again seems to perform better than the others, as it ranks more goals at higher probability percentiles, but the improvement over the single-feature models is not dramatic.<br />
+<img src="../images/3d_calibration_plots.png" alt="q3_4" /><br />
+A well-calibrated model should have points that lie close to the “perfectly calibrated” line, where the predicted probabilities match the observed frequencies.
+The calibration plot shows that Distance, Angle and Distance-angle are calibrated while the random baseline is poorly calibrated, with most predictions clustered at the low probability end and not aligning with the diagonal line representing perfect calibration.distance-angle is passing the perfect line to the point that we can consider over fitting.but we can assume that feature selectioon play a important role in model calibration.
+To improve the model, it may be necessary to explore more complex models, additional features, or different data preprocessing techniques.</p>
+<h3 id="question-4"><strong>Question 4</strong>:</h3>
+<p><br />Logistic Regression Distance: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/976e951b6afd44de9aef1a9524fcf6f2?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/976e951b6afd44de9aef1a9524fcf6f2?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br />
+<br />Logistic Regression Angle: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f64365671ef04d90b10997ee382232ee?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f64365671ef04d90b10997ee382232ee?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br />
+<br />Logistic Regression Distance-Angle: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/5f068b961b7e4ac48bfd3010e0697582?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/5f068b961b7e4ac48bfd3010e0697582?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br /></p>
+<h2 id="4-feature-engineering-ii"><strong>4. Feature Engineering II</strong></h2>
+
+<p>The following are feature names outputted by <code class="language-plaintext highlighter-rouge">feature_eng2_cleaned</code> (i.e., our feature engineering function provided in <code class="language-plaintext highlighter-rouge">Milestone2/features/feature_eng2.py</code>) with their respective descriptions:</p>
+
+<p><strong>gameSeconds (<code class="language-plaintext highlighter-rouge">int</code>):</strong> value of number of seconds into the game  <br />
+ <strong>period (<code class="language-plaintext highlighter-rouge">int</code>):</strong> value of the period number (ex: <code class="language-plaintext highlighter-rouge">period = 3</code> for P-3) <br />
+ <strong>x_coordinate(<code class="language-plaintext highlighter-rouge">float</code>):</strong> x coordinate of the event in feet <br />
+ <strong>y_coordinate (<code class="language-plaintext highlighter-rouge">float</code>):</strong> y coordinate of the event in feet  <br />
+ <strong>shotDistance (<code class="language-plaintext highlighter-rouge">float</code>):</strong> distance between the event and the net  <br />
+ <strong>shotAngle (<code class="language-plaintext highlighter-rouge">float</code>):</strong> acute angle (in degrees) between the event and the goal with respect to the x-axis  <br />
+ <strong>shotType (<code class="language-plaintext highlighter-rouge">str</code>):</strong> type of shot (ex: Wrist Shot, Slap Shot)  <br />
+ <strong>LastEventType (<code class="language-plaintext highlighter-rouge">str</code>):</strong> previous event type (ex: Shot, Goal)  <br />
+ <strong>Last_x_coordinate (<code class="language-plaintext highlighter-rouge">float</code>):</strong> x coordinate of the previous event in feet <br />
+ <strong>Last_y_coordinate (<code class="language-plaintext highlighter-rouge">float</code>):</strong> y coordinate of the previous event in feet <br />
+ <strong>timeFromLastEvent (<code class="language-plaintext highlighter-rouge">float</code>):</strong> time interval in seconds between the current and previous event  <br />
+ <strong>DistanceLastEvent (<code class="language-plaintext highlighter-rouge">float</code>):</strong> distance in feet between the current and previous event  <br />
+ <strong>Rebound (<code class="language-plaintext highlighter-rouge">bool</code>):</strong> boolean value for if the shot was a rebound (<code class="language-plaintext highlighter-rouge">True/1</code>) or not (<code class="language-plaintext highlighter-rouge">False/0</code>) <br />
+ <strong>changeShotAngle (<code class="language-plaintext highlighter-rouge">bool</code>):</strong> if <code class="language-plaintext highlighter-rouge">Rebound = True/1</code>, change in the angle of the puck before and after the rebound  <br />
+ <strong>speed (<code class="language-plaintext highlighter-rouge">float</code>):</strong> speed between current and previous event corresponding to DistanceLastEvent/timeFromLastEvent in ft/s <br />
+ <strong>time_since_pp (<code class="language-plaintext highlighter-rouge">float</code>):</strong> BONUS feature corresponding to the time in seconds since the currently active power-play started <br />
+<strong>no_players_home (<code class="language-plaintext highlighter-rouge">int</code>):</strong> BONUS feature corresponding to the number of home team non-goalie players current on the ice <br />
+ <strong>no_players_away (<code class="language-plaintext highlighter-rouge">int</code>):</strong> BONUS feature corresponding to the number of away team non-goalie players current on the ice <br />
+ <strong>is_goal (<code class="language-plaintext highlighter-rouge">bool</code>):</strong> boolean value where 0 corresponds to a shot (<strong>not</strong> goal), while 1 corresponds to a goal.<br /><br />
+ The following features were added by personal initiative (as part of part 6):<br />
+ <strong>home_pts (<code class="language-plaintext highlighter-rouge">int</code>):</strong> current number of points scored by the home team during the game (i.e., home score) <br />
+ <strong>away_pts (<code class="language-plaintext highlighter-rouge">int</code>):</strong> current number of points scored by the away team during the game (i.e., away score) <br />
+ <strong>diff_pts (<code class="language-plaintext highlighter-rouge">int</code>):</strong> difference between the current number of points scored by the home and away teams <br /></p>
+
+<h2 id="4-feature-engineering-iibonus"><strong>4. Feature Engineering II(bonus)</strong></h2>
+
+<p>We’ve computed the time (s) since the power-play (PP) started for all penalties (both teams included), for home team penalties, and for away team penalties as a function of period time (in seconds). See the following plots below for the game ID 2016020031 of regular season in 2016 during period 3. Naturally, the y-value (time since PP start) increases as the periodTime increases. Also, the combination of the time since PP start for home team penalties and away team penalties also corresponds to the plot for the time since PP started for all penalties (both teams included).</p>
+
+<p><img src="../images/timer.png" alt="t" />
+<img src="../images/timer_home.png" alt="th" />
+<img src="../images/timer_away.png" alt="ta" /></p>
+
+<p>Moreover, we’ve determined the number of friendly non-goalie (home team) skaters on the ice as well as the number of opposing non-goalie skaters (away team) on the ice as a function of period time (s). The function generating the data plotted takes as input the game data <code class="language-plaintext highlighter-rouge">pd.Dataframe</code> as well as the period number <code class="language-plaintext highlighter-rouge">select_period</code>. See the following plots below for the game ID 2016020031 of regular season in 2016 during period 3:</p>
+
+<p><img src="../images/homeplayers.png" alt="hp" />
+<img src="../images/awayplayers.png" alt="ap" /></p>
+
+<p>Comet link for DataFrame: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ad9395a05a6d42a4ab5c1d25595692f9?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=step">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ad9395a05a6d42a4ab5c1d25595692f9?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=step</a></p>
+<h2 id="5-advanced-models"><strong>5. Advanced Models</strong></h2>
+
+<h3 id="question-1-2"><strong>Question 1</strong>:</h3>
+<p>The following 4 figures were generated after training the XGBoost classifier only shot distance, only shot angle and shot distance and angle together:
+<img src="../images/5-1a_ROC_Curves.png" alt="xgb_ROC" />
+<img src="../images/5-1b_Goal_rate.png" alt="xgb_goal_rate" />
+<img src="../images/5-1c_Cumulative_Goal_Percentage.png" alt="xgb_cumulative_goal_percent" />
+<img src="../images/5-1d_Calibration_Plots.png" alt="xgb_calibration_plots" /></p>
+
+<p>For this experiment, the features listed in feature engineering 2 were used. First, the rows with <code class="language-plaintext highlighter-rouge">NaN</code> or <code class="language-plaintext highlighter-rouge">inf</code> values were dropped. Then, the data was split into training and validation sets in the ratio 70% to 30%.<br /> 
+The data was found to be heavily imbalanced with <code class="language-plaintext highlighter-rouge">class 0</code> (no goal) comprising 91% of the data and <code class="language-plaintext highlighter-rouge">class 1</code> (goal) comprising 9% of the data. Hence, the split was stratified to prevent over-representation of the majority class in either of the training or validation sets.<br />
+As compared to Logistic Regression, the accuracy obtained by XGBoost is significantly higher but Logistic Regression scores well on metrics like F1 score, Precision, Recall which are important in case of an imbalanced dataset. 
+Moreover, the area under the ROC curve for XGBoost is higher as compared to Logistic Regression baseline i.e. XGBoost is more accurate at predicting whether an event is a goal or not. Furthermore, the calibration curves denote that the predicted probabilities are very narrow for Logistic Regression while they are spread 
+out in the case of XGBoost. This may indicate that Logistic Regression is mostly able to predict the lower probabilities i.e. events that could be no goals while the spread in the case of XGBoost indicates that it can predict if an event is a goal with higher probability. <br /><br />
+Comet experiment link: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ed9f2771ab0649a6bb050a3af5949dfc?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ed9f2771ab0649a6bb050a3af5949dfc?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a></p>
+
+<h3 id="question-2-2"><strong>Question 2</strong>:</h3>
+<p>For this experiment, the Python library <code class="language-plaintext highlighter-rouge">optuna</code> was used to find the optimal set of hyperparameter values. The setup aimed to find the optimal hyperparameter values from <code class="language-plaintext highlighter-rouge">booster</code> (type of boosting model that is used), <code class="language-plaintext highlighter-rouge">lambda</code> (L2 regularization term on weights), <code class="language-plaintext highlighter-rouge">alpha</code> (L1 regularization term on weights).<br /> 
+Based on the value of <code class="language-plaintext highlighter-rouge">booster</code>, a number of other hyperparameters are used such as:<br />
+For <code class="language-plaintext highlighter-rouge">booster</code> value <code class="language-plaintext highlighter-rouge">gbtree</code> or <code class="language-plaintext highlighter-rouge">dart</code></p>
 <ul>
-  <li>Get the season in which the game was played (e.g. 2016, 2017, 2018, 2019, 2020).</li>
-  <li>Get the corresponding number for the type of game (<strong>‘02’</strong> in this case).</li>
-  <li>Get the game number which can range from 1 to the total number of games in a given season.</li>
+  <li><code class="language-plaintext highlighter-rouge">max_depth</code>: Maximum depth of the tree. Value is selected as an integer from 1 to 9 to avoid overfitting.</li>
+  <li><code class="language-plaintext highlighter-rouge">eta</code>: Step size shrinkage used in update to prevent overfitting. Value is sampled from log domain between 1e-8 and 1.</li>
+  <li><code class="language-plaintext highlighter-rouge">gamma</code>: Minimum loss reduction required to make a further partition on a leaf node of the tree. Value is sampled from log domain between 1e-8 and 1.</li>
+  <li><code class="language-plaintext highlighter-rouge">grow_policy</code>: Tree construction algorithm used in training. Values can be “depthwise” or “lossguide”.</li>
 </ul>
 
-<p>For example, the ID <strong><em>2018020143</em></strong> denotes the game number ‘143’ 
-played in 2018 Regular season <em>(Vancouver Canucks vs Arizona Coyotes)</em>.
-<br />
-<br />
-Following Python snippet generates the game ID and obtains the corresponding data for Regular season games:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Loop in a single hockey season e.g. 2016 (2016-17 season), 2020 (2020-21 season)
-</span><span class="k">for</span> <span class="n">season</span><span class="p">,</span> <span class="n">games</span> <span class="ow">in</span> <span class="n">seasons_to_game_volume_map</span><span class="p">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="c1"># Loop inside a particular game type i.e. regular or playoffs
-</span>    <span class="k">for</span> <span class="n">game_type</span> <span class="ow">in</span> <span class="n">game_types</span><span class="p">:</span>
-        <span class="c1"># Check the game type. If it is regular then the last 4 digits
-</span>        <span class="c1"># should be the game number
-</span>        <span class="k">if</span> <span class="n">game_type</span> <span class="o">==</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">games</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">))</span>
-                <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
-</code></pre></div></div>
-
-<h3 id="playoffs">Playoffs</h3>
-<p>The Playoffs consist of 4 rounds with the 1st round having 8 matchups, 2nd round having 4 matchups,
-3rd round having 2 matchups and the final round having 1 matchup.
-<br />
-<br />
-Also, each of the matchups can have 7 games, out of which games 5, 6 and 7 do not necessarily have to be played.
-<br />
-<br />
-Here’s how the <strong>game_number</strong> parameter was constructed for Playoff games:</p>
+<p>For <code class="language-plaintext highlighter-rouge">booster</code> value <code class="language-plaintext highlighter-rouge">dart</code></p>
 <ul>
-  <li>First 2 digits specify the round (i.e. ‘01’, ‘02’, ‘03’, ‘04’)</li>
-  <li>The 3rd digit is the matchup number. It can range from 1 to 8 for round 1, 1 to 4 for round 2, 
-1 to 2 for round 3 and 1 for round 4.</li>
-  <li>The 4th digit is the game number. For each matchup, it can range from 1 to 7.</li>
+  <li><code class="language-plaintext highlighter-rouge">sample_type</code>: Type of sampling algorithm used in dropout. Values can be “uniform” or “weighted”.</li>
+  <li><code class="language-plaintext highlighter-rouge">normalize_type</code>: Type of normalization algorithm used in dropout. Values can be “tree” or “forest”.</li>
+  <li><code class="language-plaintext highlighter-rouge">rate_drop</code>: Dropout rate. Value is sampled from log domain between 1e-8 and 1.0.</li>
+  <li><code class="language-plaintext highlighter-rouge">skip_drop</code>: Probability of skipping the dropout during a boosting iteration. Value is sampled from log domain between 1e-8 and 1.</li>
 </ul>
 
-<p>For example, the game ID <strong><em>2017030314</em></strong> denotes the 4th game of the 1st matchup in 
-the 3rd round of 2017-18 Playoffs <em>(Tampa Bay Lightning vs Washington Capitals)</em>.
-<br />
-<br />
-<em> Note: The first 6 digits of the Playoffs game ID follow the same pattern as the Regular season games.
-The only difference is that the number for type of game is <strong>‘03’</strong>.</em></p>
+<p>Apart from the above hyperparameters, <code class="language-plaintext highlighter-rouge">XGBoostPruningCallback</code> was used for pruning based on validation AUC for early-stopping unpromising trials.<br />
+The following curves depict the hyperparameter selection process and the most important hyperparameters:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">History Plot</code>: In this plot the y-axis shows the accuracy achieved by different trials while the x-axis shows the trial number. Each of the points on the graph corresponds to a trial and the line connects the points with the best performance till that iteration. The eventual flattening or convergence of the line denotes that optimum values are being reached at. The history plot can help us to see which hyperparameter configurations perform better or worse.
+<img src="../images/History_plot.png" alt="hp_history" /></li>
+  <li><code class="language-plaintext highlighter-rouge">Importance Plot</code>: This plot visualizes the importance of each hyperparameter in the optimization process. The x-axis represents the importance score for a feature while the y-axis represents the hyperparameter names. The relative values of the importance scores help us to understand which hyperparameters contribute more to the optimization process. 
+<img src="../images/Importance_plot.png" alt="imp_plot" /></li>
+</ul>
 
-<p>Following Python snippet generates the game ID and obtains the corresponding data for Playoff games:</p>
+<p>After optimizing the hyperparameters, the following graphs were generated:
+<img src="../images/5-2a%20ROC%20Curve.png" alt="5_2_roc" />
+<img src="../images/5-2b%20Goal%20Rate.png" alt="5_2_goal_rate" />
+<img src="../images/5-2c%20Cumulative%20Goal%20Percentage.png" alt="5_2_cumulative_goals" />
+<img src="../images/5-2d%20Calibration%20Plot.png" alt="5_2_calibration_plot" /></p>
 
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">else</span><span class="p">:</span>
-    <span class="n">total_match_ups</span> <span class="o">=</span> <span class="mi">8</span>
-    <span class="n">round_num</span> <span class="o">=</span> <span class="mi">1</span>
+<p>The hyperparameter tuned XGBoost performs a little better than the XGBoost baseline model as the F1, Precision and Recall scores are higher for the hyperparameter tuned model. 
+Moreover, there is a very minute difference in the area under the ROC curve between hyperparameter tuned XGBoost and XGBoost baseline which indicates that both the models predict an event as a goal or not roughly the same number of times. 
+Furthermore, the calibration plots of both the models are equally spread and display the same characteristic and both models can equally predict with higher probability if a shot is a goal.<br /><br />
+Comet experiment link: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/d952e0f5e23d4753bfdebb81896ad354?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/d952e0f5e23d4753bfdebb81896ad354?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a></p>
 
-    <span class="c1"># Continually divide total_match_ups as after each round
-</span>    <span class="c1"># half of the teams are eliminated
-</span>    <span class="k">while</span> <span class="n">total_match_ups</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">match_up</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">total_match_ups</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-                <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">value</span><span class="p">,</span>
-                                           <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">round_num</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}{</span><span class="n">match_up</span><span class="si">}{</span><span class="n">game_number</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
-                <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
-        <span class="n">total_match_ups</span> <span class="o">=</span> <span class="n">total_match_ups</span> <span class="o">//</span> <span class="mi">2</span>
-        <span class="n">round_num</span> <span class="o">+=</span> <span class="mi">1</span>
-</code></pre></div></div>
+<h3 id="question-3-2"><strong>Question 3</strong>:</h3>
+<p>For this experiment, we relied on the following feature selection strategies:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">VarianceThreshold</code>: In this technique, we filter out all the features with low variance under the assumption that features with low variance do not contain too much information. Underlying principle is that if a feature varies very little across the samples, then it might not help the model to distinguish between different classes. We provided the threshold as <code class="language-plaintext highlighter-rouge">0.8 * (1-0.8)</code> and all the features with variance lower than this were removed.</li>
+  <li><code class="language-plaintext highlighter-rouge">SelectKBest</code>: This is a feature selection strategy in scikit-learn which selects the top k features based on the provided scoring metric. We provided the <code class="language-plaintext highlighter-rouge">mutual_info_classif</code> (Mutual Information Classifier) as the scoring function, which measures the dependency between a pair of random variables.</li>
+  <li><code class="language-plaintext highlighter-rouge">ExtraTreesClassifier</code>: In this technique, we train the <code class="language-plaintext highlighter-rouge">ExtraTreesClassifier</code> on our training data which assigns each feature a score indicative of the feature’s contribution in accurate predictions. We then use <code class="language-plaintext highlighter-rouge">SelectFromModel</code> from scikit-learn to select the best features based on the scores.</li>
+</ul>
 
-<p>The class <strong><em>scrape_nhl_data</em></strong> does the work of downloading all the data. Following
-is the code for the same:</p>
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">scrape_nhl_data</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">get_game_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">season</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">game_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">season</span><span class="si">}{</span><span class="n">game_type</span><span class="si">}{</span><span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s">'</span>
+<p>For the above 3 techniques, we use cross-validation with 10 folds and in each fold we select the most important features. We then train an XGBoost classifier on these features and calculate the F1 score (since dataset is imbalanced) of each fold. Post that we average out the F1 scores to get a reliable estimate of the model’s predictive performance.<br />
+Following the above process, the highest F1 score was found to be in the case of <code class="language-plaintext highlighter-rouge">ExtraTreesClassifier</code> and after performing feature selection with <code class="language-plaintext highlighter-rouge">ExtraTreesClassifier</code>, the features <code class="language-plaintext highlighter-rouge">gameSeconds</code>, <code class="language-plaintext highlighter-rouge">x_coordinate</code>, <code class="language-plaintext highlighter-rouge">y_coordinate</code>, <code class="language-plaintext highlighter-rouge">shotDistance</code>,
+       <code class="language-plaintext highlighter-rouge">shotAngle</code>, <code class="language-plaintext highlighter-rouge">Last_x_coordinate</code>, <code class="language-plaintext highlighter-rouge">Last_y_coordinate</code>,
+       <code class="language-plaintext highlighter-rouge">timeFromLastEvent</code>, <code class="language-plaintext highlighter-rouge">DistanceLastEvent</code>, <code class="language-plaintext highlighter-rouge">changeShotAngle</code>, <code class="language-plaintext highlighter-rouge">speed</code> were found to be optimal.<br />
+To verify the optimal feature set, the following <code class="language-plaintext highlighter-rouge">SHAP</code> plots were used to see the feature importances:
+<img src="../images/SHAP_force_plot.png" alt="shap_force" />
+<img src="../images/SHAP_Waterfall.png" alt="shap_waterfall" /></p>
 
-    <span class="k">def</span> <span class="nf">write_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loc</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">season</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">content</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SupportsIndex</span><span class="p">,</span> <span class="nb">slice</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="n">season</span> <span class="o">!=</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span> <span class="ow">and</span> <span class="s">'endDateTime'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">content</span><span class="p">[</span><span class="s">'gameData'</span><span class="p">][</span><span class="s">'datetime'</span><span class="p">]:</span>
-            <span class="k">return</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">loc</span><span class="si">}</span><span class="s">.json'</span><span class="p">,</span> <span class="s">'w+'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s">'utf-8'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">json</span><span class="p">.</span><span class="n">dump</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<p>The following curves were obtained after training the hyperparameter tuned XGBoost model on the above obtained optimal set of features:
+<img src="../images/5-3a%20ROC%20Curve.png" alt="5_3_ROC" />
+<img src="../images/5-3b%20Goal%20Rate.png" alt="5_3_goal_rate" />
+<img src="../images/5-3c%20Cumulative%20Goal%20Percentage.png" alt="5_3_cumulative_goal" />
+<img src="../images/5-3d%20Calibration%20Plot.png" alt="5_3_calibration" /></p>
 
-    <span class="k">def</span> <span class="nf">scrape_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">game_id</span><span class="p">,</span> <span class="n">game_type</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="n">endpoint</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'https://statsapi.web.nhl.com/api/v1/game/</span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s">/feed/live/'</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">time</span><span class="p">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
-            <span class="n">res</span> <span class="o">=</span> <span class="n">req</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint</span><span class="p">)</span>
-            <span class="n">res</span><span class="p">.</span><span class="n">raise_for_status</span><span class="p">()</span>
-            <span class="bp">self</span><span class="p">.</span><span class="n">write_data</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s">'</span><span class="p">,</span> <span class="n">game_type</span><span class="p">,</span> <span class="n">res</span><span class="p">.</span><span class="n">json</span><span class="p">())</span>
-        <span class="k">except</span> <span class="n">req</span><span class="p">.</span><span class="n">exceptions</span><span class="p">.</span><span class="n">HTTPError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'API failed for </span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s"> with status code </span><span class="si">{</span><span class="n">err</span><span class="p">.</span><span class="n">response</span><span class="p">.</span><span class="n">status_code</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
-        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">game_type</span><span class="si">}</span><span class="s"> trace: </span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s"> </span><span class="si">{</span><span class="n">game_id</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
-            <span class="k">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+<p>The XGBoost model after feature selection performs a little better than the XGBoost baseline model as the F1, Precision and Recall scores are higher for the model trained after feature selection. 
+Moreover, there is a very minute difference in the area under the ROC curve between XGBoost with feature selection and XGBoost baseline which indicates that both the models predict an event as a goal or not roughly the same number of times. 
+Furthermore, the calibration plots of both the models are equally spread and display the same characteristic and both models can equally predict with higher probability if a shot is a goal.<br /><br />
+Comet experiment link: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/003cfd6101b74b0cb01539faea73dc67?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/003cfd6101b74b0cb01539faea73dc67?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a></p>
 
-    <span class="k">def</span> <span class="nf">get_play_by_play_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-                              <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                              <span class="n">seasons_to_game_volume_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                              <span class="n">game_types</span><span class="p">:</span> <span class="nb">list</span>
-                              <span class="p">):</span>
-        <span class="s">"""Created folders and individual json files for
-                Arguments:
-                    path (str): Location where the files should be created.
-                    Ideally it should be the 'data' folder of our repository.
+<h2 id="6-give-it-your-best-shot"><strong>6. Give it your best shot!</strong></h2>
 
-                    Note: Do not precede the path with a '/'. If the data
-                    needs to be saved in the same directory as this script then
-                    pass an empty string ''.
+<h3 id="question-1-3"><strong>Question 1</strong>:</h3>
+<p>We trained ADABoost with 1 estimator preceded by a Random Forest Classifier for feature selection. We used all the features from Feature Engineering 2 along with the features that we created from our personal initiative. After feature selection,  we employed weight sampling to account for the heavily imbalanced dataset (the goal/shot ratio was 10%/90%, which is heavily imbalanced). We trained this model with a <code class="language-plaintext highlighter-rouge">max_depth</code> of 1,3, and 10, where an inrease in <code class="language-plaintext highlighter-rouge">max_depth</code> was associated with an increase in all performance metrics.<br /><br />
+Since there was an imbalance between the classes, we also tried to use over and undersampling techniques to generate/eliminate data points. We used the following techniques implemented in Python package <code class="language-plaintext highlighter-rouge">imblearn</code>:</p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">Tomek Links</code>: Tomek links are generated by pairs of instances of different classes that are close to each other. The majority class instances are then removed to help enhance the decision boundary.</li>
+  <li><code class="language-plaintext highlighter-rouge">SMOTE</code>: SMOTE Oversamples the minority class by generating by identifying its k-nearest neighbours and generates synthetic data points along the line segments connecting the instance to its neighbors.</li>
+  <li><code class="language-plaintext highlighter-rouge">SMOTETomek</code>: SMOTETomek generates minority class instances using SMOTE and removes majority class instances using Tomek Links.</li>
+</ul>
 
-                    seasons_to_game_volume_map (dict of str: int): Map of seasons
-                    for which the data is required and the corresponding number of
-                    games in that season. For e.g. it will have the key as '2016'
-                    for the 2016-17 season.
+<p>The following curves were obtained after performing all the experiments listed above:
+<img src="../images/6-1a-ROC.png" alt="6-ROC" />
+<img src="../images/6-1b-goal-rate.png" alt="6-Goal" />
+<img src="../images/6-1c-Cumulative.png" alt="6-cumulative" />
+<img src="../images/6-1d-calibration.png" alt="6-calibration" /></p>
 
-                    game_types (dict of str: str): List of game types for which
-                    data needs to be retrieved.
+<p><strong>Note:</strong> The curves for <code class="language-plaintext highlighter-rouge">SMOTETomek</code>, <code class="language-plaintext highlighter-rouge">Tomek</code> and <code class="language-plaintext highlighter-rouge">SMOTE</code> are overlapping.<br /><br />
+We consider SMOTETomek as our best model as it had the highest area under ROC curve (0.75), had a reasonable F1 score (15.8) and its calibration plot had the least amount of vertical deviation (that is, it was closest to a perfectly calibrated classifier), while maintaining the same spread in probabilities.</p>
 
-                Return:
-                    Folder containing data for each hockey season. These folders in
-                    turn contain play-by-play data for regular and playoff games.
-        """</span>
-        <span class="c1"># Loop in a single hockey season e.g. 2016 (2016-17 season), 2020 (2020-21 season)
-</span>        <span class="k">for</span> <span class="n">season</span><span class="p">,</span> <span class="n">games</span> <span class="ow">in</span> <span class="n">seasons_to_game_volume_map</span><span class="p">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="c1"># Loop inside a particular game type i.e. regular or playoffs
-</span>            <span class="k">for</span> <span class="n">game_type</span> <span class="ow">in</span> <span class="n">game_types</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">loc</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">game_type</span><span class="si">}</span><span class="s">'</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">loc</span> <span class="o">=</span> <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">game_type</span><span class="si">}</span><span class="s">'</span>
+<h3 id="question-2-3"><strong>Question 2</strong>:</h3>
+<p>Comet experiment link for SMOTETomek: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/9e5adeeac7664562a2d5d9ee7940c752?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/9e5adeeac7664562a2d5d9ee7940c752?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br /><br />
+Comet experiment link for Tomek: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/03e1ba00a55243f3be18c6bd3c7f3e67?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/03e1ba00a55243f3be18c6bd3c7f3e67?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br /><br />
+Comet experiment link for SMOTE: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/9cf67e5d9248499182a9835d08024bbe?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/9cf67e5d9248499182a9835d08024bbe?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br /><br />
+Comet experiment link for Adaboost (max_depth=1): <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/00194cb4469c492d876b63e4761bf657?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/00194cb4469c492d876b63e4761bf657?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br /><br />
+Comet experiment link for Adaboost (max_depth=3): <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/8556a69d36a845f8b16e91ab19a32947?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/8556a69d36a845f8b16e91ab19a32947?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br /><br />
+Comet experiment link for Adaboost (max_depth=10): <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/54fcd486ec094e6489648336c7d04cdb?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/54fcd486ec094e6489648336c7d04cdb?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a></p>
 
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">exists</span><span class="p">(</span><span class="n">loc</span><span class="p">):</span>
-                    <span class="n">os</span><span class="p">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">loc</span><span class="p">)</span>
+<h2 id="7-evaluate-on-test-set"><strong>7. Evaluate on test set</strong></h2>
 
-                <span class="c1"># Check the game type. If it is regular then the last 4 digits
-</span>                <span class="c1"># should be the game number
-</span>                <span class="k">if</span> <span class="n">game_type</span> <span class="o">==</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">games</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                        <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">game_number</span><span class="p">))</span>
-                        <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
+<h3 id="question-1-4"><strong>Question 1</strong>:</h3>
+<p>The figures for Regular season are as follows:
+<img src="../images/7-1a-ROC.png" alt="7_1_ROC" />
+<img src="../images/7-1b-goal-rate.png" alt="7_1_goal" />
+<img src="../images/7-1c-cumulative.png" alt="7_1_cumulative" />
+<img src="../images/7-1d-calibration.png" alt="7_1_calibration" /></p>
 
-                <span class="c1"># Otherwise, game_type == 'playoff' and the last 4 digits
-</span>                <span class="c1"># should be composed as follows:
-</span>                <span class="c1"># first 2 digits -&gt; round number (can be 01, 02, 03, 04)
-</span>                <span class="c1"># third digit -&gt; match up (can be upto 8, 4, 2, 1 for
-</span>                <span class="c1"># the above mentioned round numbers)
-</span>                <span class="c1"># fourth digit -&gt; game number (can be from 1 to 7)
-</span>                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">total_match_ups</span> <span class="o">=</span> <span class="mi">8</span>
-                    <span class="n">round_num</span> <span class="o">=</span> <span class="mi">1</span>
+<p>All models perform worse on the test set for regular season as compared to the validation set. The area under the ROC curves are more or less similar for all the classifiers 
+but the large amount of vertical deviations in the calibration plot indicates a substantial discrepancy between the predicted probabilities and the actual outcomes at higher probability ranges. However, for lower probability ranges,
+the calibration plot maintains the same behaviour. This can be due to the fact that since most of the events are no goals, the model correctly predicts the probabilities of those events.</p>
+<h3 id="question-2-4"><strong>Question 2</strong>:</h3>
+<p>The figures for Playoffs are as follows:
+<img src="../images/7-2a-ROC.png" alt="7_2_ROC" />
+<img src="../images/7-2b-goal-rate.png" alt="7_2_goal" />
+<img src="../images/7-2c-cumulative.png" alt="7_2_cumulative" />
+<img src="../images/7-2d-calibration.png" alt="7_2_calibration" /></p>
 
-                    <span class="c1"># Continually divide total_match_ups as after each round
-</span>                    <span class="c1"># half of the teams are eliminated
-</span>                    <span class="k">while</span> <span class="n">total_match_ups</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="k">for</span> <span class="n">match_up</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">total_match_ups</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-                            <span class="k">for</span> <span class="n">game_number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-                                <span class="n">game_id</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_game_id</span><span class="p">(</span><span class="n">season</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">value</span><span class="p">,</span>
-                                                           <span class="sa">f</span><span class="s">'</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">round_num</span><span class="p">).</span><span class="n">zfill</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="si">}{</span><span class="n">match_up</span><span class="si">}{</span><span class="n">game_number</span><span class="si">}</span><span class="s">'</span><span class="p">)</span>
-                                <span class="bp">self</span><span class="p">.</span><span class="n">scrape_data</span><span class="p">(</span><span class="n">game_id</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">loc</span><span class="p">)</span>
-                        <span class="n">total_match_ups</span> <span class="o">=</span> <span class="n">total_match_ups</span> <span class="o">//</span> <span class="mi">2</span>
-                        <span class="n">round_num</span> <span class="o">+=</span> <span class="mi">1</span>
-</code></pre></div></div>
-
-<p>The function <strong><em>get_play_by_play_data</em></strong> needs to be called with the download path, seasons and their corresponding
-number of games and the game types for which the data is to be downloaded.
-<br />
-<br />
-Here is an example of how this function can be called:</p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">make_dataset</span> <span class="kn">import</span> <span class="n">Gametype</span><span class="p">,</span> <span class="n">scrape_nhl_data</span>
-
-<span class="n">scraper</span> <span class="o">=</span> <span class="n">scrape_nhl_data</span><span class="p">()</span>
-<span class="n">season_data</span> <span class="o">=</span> <span class="p">{</span><span class="s">'2016'</span><span class="p">:</span> <span class="mi">1230</span><span class="p">,</span> <span class="s">'2017'</span><span class="p">:</span> <span class="mi">1271</span><span class="p">,</span> <span class="s">'2018'</span><span class="p">:</span> <span class="mi">1271</span><span class="p">,</span><span class="s">'2019'</span><span class="p">:</span> <span class="mi">1271</span><span class="p">,</span><span class="s">'2020'</span><span class="p">:</span> <span class="mi">868</span><span class="p">}</span>
-<span class="n">game_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">Gametype</span><span class="p">.</span><span class="n">REGULAR</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">Gametype</span><span class="p">.</span><span class="n">PLAYOFFS</span><span class="p">.</span><span class="n">name</span><span class="p">]</span>
-<span class="n">data</span> <span class="o">=</span> <span class="n">scraper</span><span class="p">.</span><span class="n">get_play_by_play_data</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s">''</span><span class="p">,</span> <span class="n">seasons_to_game_volume_map</span><span class="o">=</span><span class="n">season_data</span><span class="p">,</span><span class="n">game_types</span><span class="o">=</span><span class="n">game_types</span><span class="p">)</span>
-</code></pre></div></div>
-<p><br /><br /><br /></p>
-<h2 id="2-interactive-debugging-tool"><strong>2. Interactive Debugging Tool</strong></h2>
-<p><strong>Question 1</strong></p>
-
-<p>The tool allows the user to dynamically obtain data about a game (ex: points scored, shots on goals) which are outputted in tabular form by specifying the <strong>year</strong>, <strong>season</strong>, and <strong>game ID</strong>. Once the game is selected, the user may scroll through all plays throughout the game which the code dynamically visualizes with a map of the ice rink and details of the play (ex: nature of the play/event, period, players involved and their teams), which notably include the coordinates of the event. Underneath this visual aid, the full play data is outputted in text form for the user. See image and code below of our team’s implementation of this interactive tool.</p>
-
-<p><img src="../images/figure1.png" alt="plot" /></p>
-
-<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> <span class="n">game_ID</span><span class="p">):</span>
-    
-    <span class="n">data_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/"</span>
-    <span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="p">.</span><span class="n">glob</span><span class="p">(</span><span class="n">data_path</span><span class="o">+</span><span class="s">'*.json'</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="p">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s">'(\d+).json'</span><span class="p">,</span> <span class="n">x</span><span class="p">).</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">files</span><span class="p">[</span><span class="n">game_ID</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="s">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span>
-        <span class="n">game_data</span> <span class="o">=</span> <span class="n">json</span><span class="p">.</span><span class="n">load</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span>
-    
-    <span class="n">gameTime</span> <span class="o">=</span> <span class="n">game_data</span><span class="p">[</span><span class="s">'gameData'</span><span class="p">][</span><span class="s">'datetime'</span><span class="p">][</span><span class="s">'dateTime'</span><span class="p">]</span>
-    <span class="n">homeTeam</span> <span class="o">=</span> <span class="n">game_data</span><span class="p">[</span><span class="s">'gameData'</span><span class="p">][</span><span class="s">'teams'</span><span class="p">][</span><span class="s">'home'</span><span class="p">][</span><span class="s">'name'</span><span class="p">]</span>
-    <span class="n">awayTeam</span> <span class="o">=</span> <span class="n">game_data</span><span class="p">[</span><span class="s">'gameData'</span><span class="p">][</span><span class="s">'teams'</span><span class="p">][</span><span class="s">'away'</span><span class="p">][</span><span class="s">'name'</span><span class="p">]</span>
-    <span class="n">liveData</span> <span class="o">=</span> <span class="n">game_data</span><span class="p">[</span><span class="s">'liveData'</span><span class="p">][</span><span class="s">'linescore'</span><span class="p">][</span><span class="s">'periods'</span><span class="p">]</span>
-    <span class="n">num_periods</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">liveData</span><span class="p">)</span>
-    <span class="n">home_SoG</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">([</span><span class="n">liveData</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">'home'</span><span class="p">][</span><span class="s">'shotsOnGoal'</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_periods</span><span class="p">)])</span>
-    <span class="n">home_goals</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">([</span><span class="n">liveData</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">'home'</span><span class="p">][</span><span class="s">'goals'</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_periods</span><span class="p">)])</span>
-    <span class="n">away_SoG</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">([</span><span class="n">liveData</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">'away'</span><span class="p">][</span><span class="s">'shotsOnGoal'</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_periods</span><span class="p">)])</span>
-    <span class="n">away_goals</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="nb">sum</span><span class="p">([</span><span class="n">liveData</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">'away'</span><span class="p">][</span><span class="s">'goals'</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_periods</span><span class="p">)])</span>
-    
-    <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s">'Home'</span><span class="p">:</span> <span class="p">[</span><span class="n">homeTeam</span><span class="p">,</span> <span class="n">home_goals</span><span class="p">,</span> <span class="n">home_SoG</span><span class="p">],</span> <span class="s">'Away'</span><span class="p">:</span> <span class="p">[</span><span class="n">awayTeam</span><span class="p">,</span> <span class="n">away_goals</span><span class="p">,</span> <span class="n">away_SoG</span><span class="p">]}</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="p">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="s">'Teams:'</span><span class="p">,</span> <span class="s">'Goals'</span><span class="p">,</span> <span class="s">'SOG'</span><span class="p">])</span>
-    
-    <span class="k">print</span><span class="p">(</span><span class="s">'Game time: '</span><span class="o">+</span> <span class="n">gameTime</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s">'Game ID: '</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">game_ID</span><span class="p">))</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
-    
-    <span class="k">return</span> <span class="n">game_data</span>
-
-<span class="c1"># Initializing widgets
-</span><span class="n">year_slider</span> <span class="o">=</span> <span class="n">widgets</span><span class="p">.</span><span class="n">IntSlider</span><span class="p">(</span>
-                <span class="n">value</span><span class="o">=</span><span class="mi">2022</span><span class="p">,</span> 
-                <span class="nb">min</span><span class="o">=</span><span class="mi">2016</span><span class="p">,</span> 
-                <span class="nb">max</span><span class="o">=</span><span class="mi">2020</span><span class="p">,</span> 
-                <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                <span class="n">description</span><span class="o">=</span><span class="s">'Year:'</span><span class="p">)</span>
-
-<span class="n">season_dropdown</span> <span class="o">=</span> <span class="n">widgets</span><span class="p">.</span><span class="n">Dropdown</span><span class="p">(</span>
-                <span class="n">options</span><span class="o">=</span><span class="p">[</span><span class="s">'regular'</span><span class="p">,</span> <span class="s">'playoffs'</span><span class="p">],</span> 
-                <span class="n">value</span><span class="o">=</span><span class="s">'regular'</span><span class="p">,</span> 
-                <span class="n">description</span><span class="o">=</span><span class="s">'Season:'</span><span class="p">)</span>
-
-<span class="n">game_slider</span> <span class="o">=</span> <span class="n">widgets</span><span class="p">.</span><span class="n">IntSlider</span><span class="p">(</span>
-                <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                <span class="nb">max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                <span class="n">description</span><span class="o">=</span><span class="s">'Game ID:'</span><span class="p">)</span>
-
-<span class="n">load_button</span> <span class="o">=</span> <span class="n">widgets</span><span class="p">.</span><span class="n">Button</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">"Load Game"</span><span class="p">)</span>
-
-<span class="n">play_slider</span> <span class="o">=</span> <span class="n">widgets</span><span class="p">.</span><span class="n">IntSlider</span><span class="p">(</span>
-                <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                <span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                <span class="nb">max</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> 
-                <span class="n">description</span><span class="o">=</span><span class="s">'Play ID:'</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">year_slider_updated</span><span class="p">(</span><span class="n">IntSlideValue</span><span class="p">):</span>
-    <span class="n">year</span> <span class="o">=</span> <span class="n">IntSlideValue</span><span class="p">.</span><span class="n">new</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">season_dropdown</span><span class="p">,</span> <span class="s">'value'</span><span class="p">):</span>
-        <span class="n">season</span> <span class="o">=</span> <span class="n">season_dropdown</span><span class="p">.</span><span class="n">value</span>
-        <span class="n">data_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"data/</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/"</span>
-        <span class="n">num_games</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">data_path</span><span class="p">))</span>
-        <span class="n">game_slider</span><span class="p">.</span><span class="nb">max</span> <span class="o">=</span> <span class="n">num_games</span>
-        <span class="n">game_slider</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="k">def</span> <span class="nf">season_dropdown_updated</span><span class="p">(</span><span class="n">IntSlideValue</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">year_slider</span><span class="p">,</span> <span class="s">'value'</span><span class="p">):</span>
-        <span class="n">season</span> <span class="o">=</span> <span class="n">IntSlideValue</span><span class="p">.</span><span class="n">new</span>
-        <span class="n">year</span> <span class="o">=</span> <span class="n">year_slider</span><span class="p">.</span><span class="n">value</span>
-        <span class="n">data_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"data/</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/"</span>
-        <span class="n">num_games</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="p">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">data_path</span><span class="p">))</span>
-        <span class="n">game_slider</span><span class="p">.</span><span class="nb">max</span> <span class="o">=</span> <span class="n">num_games</span>
-        <span class="n">game_slider</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="k">def</span> <span class="nf">game_slider_updated</span><span class="p">(</span><span class="n">IntSlideValue</span><span class="p">):</span>
-    <span class="n">game_number</span> <span class="o">=</span> <span class="n">IntSlideValue</span><span class="p">.</span><span class="n">new</span>
-    <span class="n">year</span> <span class="o">=</span> <span class="n">year_slider</span><span class="p">.</span><span class="n">value</span>
-    <span class="n">season</span> <span class="o">=</span> <span class="n">season_dropdown</span><span class="p">.</span><span class="n">value</span>
-    <span class="n">data_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s">"data/</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s">/</span><span class="si">{</span><span class="n">season</span><span class="si">}</span><span class="s">/"</span>
-
-<span class="k">def</span> <span class="nf">load_button_click</span><span class="p">(</span><span class="n">IntSlideValue</span><span class="p">):</span>
-    <span class="n">year</span> <span class="o">=</span> <span class="n">year_slider</span><span class="p">.</span><span class="n">value</span>
-    <span class="n">season</span> <span class="o">=</span> <span class="n">season_dropdown</span><span class="p">.</span><span class="n">value</span>
-    <span class="n">game_id</span> <span class="o">=</span> <span class="n">game_slider</span><span class="p">.</span><span class="n">value</span>
-    <span class="k">global</span> <span class="n">data</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="n">DATA_PATH</span><span class="p">,</span><span class="n">year</span><span class="p">,</span> <span class="n">season</span><span class="p">,</span> <span class="n">game_id</span><span class="p">)</span>
-    <span class="n">num_plays</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">'liveData'</span><span class="p">][</span><span class="s">'plays'</span><span class="p">][</span><span class="s">'allPlays'</span><span class="p">])</span>
-    <span class="n">play_slider</span><span class="p">.</span><span class="nb">max</span> <span class="o">=</span> <span class="n">num_plays</span>
-    <span class="n">play_slider</span><span class="p">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="n">output_widget</span> <span class="o">=</span> <span class="n">Output</span><span class="p">()</span>
-
-<span class="k">def</span> <span class="nf">play_slider_change</span><span class="p">(</span><span class="n">IntSlideValue</span><span class="p">):</span>
-    <span class="n">play_id</span> <span class="o">=</span> <span class="n">IntSlideValue</span><span class="p">.</span><span class="n">new</span>
-    
-    <span class="k">with</span> <span class="n">output_widget</span><span class="p">:</span>
-        <span class="n">output_widget</span><span class="p">.</span><span class="n">clear_output</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> 
-        
-        <span class="n">play</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">'liveData'</span><span class="p">][</span><span class="s">'plays'</span><span class="p">][</span><span class="s">'allPlays'</span><span class="p">][</span><span class="n">play_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">play_coordinates</span> <span class="o">=</span> <span class="n">play</span><span class="p">[</span><span class="s">'coordinates'</span><span class="p">]</span>
-        <span class="n">play_description</span> <span class="o">=</span> <span class="n">play</span><span class="p">[</span><span class="s">'result'</span><span class="p">][</span><span class="s">'description'</span><span class="p">]</span>
-        <span class="n">period</span> <span class="o">=</span> <span class="n">play</span><span class="p">[</span><span class="s">'about'</span><span class="p">][</span><span class="s">'period'</span><span class="p">]</span>
-        <span class="n">periodTime</span> <span class="o">=</span> <span class="n">play</span><span class="p">[</span><span class="s">'about'</span><span class="p">][</span><span class="s">'periodTime'</span><span class="p">]</span>
-        
-        <span class="n">homeTeam_triCode</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">'gameData'</span><span class="p">][</span><span class="s">'teams'</span><span class="p">][</span><span class="s">'home'</span><span class="p">][</span><span class="s">'triCode'</span><span class="p">]</span>
-        <span class="n">awayTeam_triCode</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">'gameData'</span><span class="p">][</span><span class="s">'teams'</span><span class="p">][</span><span class="s">'away'</span><span class="p">][</span><span class="s">'triCode'</span><span class="p">]</span>
-        
-        <span class="n">img</span> <span class="o">=</span> <span class="n">mpimg</span><span class="p">.</span><span class="n">imread</span><span class="p">(</span><span class="s">'https://raw.githubusercontent.com/udem-ift6758/project-template/main/figures/nhl_rink.png'</span><span class="p">)</span>
-        
-        <span class="n">plt</span><span class="p">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
-        <span class="n">plt</span><span class="p">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="o">-</span><span class="mf">42.5</span><span class="p">,</span> <span class="mf">42.5</span><span class="p">])</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">play_coordinates</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">plt</span><span class="p">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">play_coordinates</span><span class="p">[</span><span class="s">'x'</span><span class="p">],</span> <span class="n">play_coordinates</span><span class="p">[</span><span class="s">'y'</span><span class="p">],</span> <span class="n">s</span> <span class="o">=</span> <span class="mi">30</span><span class="p">)</span>
-        <span class="n">plt</span><span class="p">.</span><span class="n">axis</span><span class="p">()</span>
-        <span class="n">plt</span><span class="p">.</span><span class="n">title</span><span class="p">(</span><span class="n">play_description</span><span class="o">+</span><span class="sa">f</span><span class="s">', </span><span class="si">{</span><span class="n">periodTime</span><span class="si">}</span><span class="s"> P-</span><span class="si">{</span><span class="n">period</span><span class="si">}</span><span class="s">'</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
-        <span class="n">plt</span><span class="p">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">'feet'</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">13</span><span class="p">)</span>
-        <span class="n">plt</span><span class="p">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">'feet'</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">13</span><span class="p">)</span>
-        <span class="n">plt</span><span class="p">.</span><span class="n">show</span><span class="p">()</span>
-        
-        <span class="k">print</span><span class="p">(</span><span class="n">play</span><span class="p">)</span>
-    
-<span class="n">year_slider</span><span class="p">.</span><span class="n">observe</span><span class="p">(</span><span class="n">year_slider_updated</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s">'value'</span><span class="p">)</span>
-<span class="n">game_slider</span><span class="p">.</span><span class="n">observe</span><span class="p">(</span><span class="n">game_slider_updated</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s">'value'</span><span class="p">)</span>
-<span class="n">season_dropdown</span><span class="p">.</span><span class="n">observe</span><span class="p">(</span><span class="n">season_dropdown_updated</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s">'value'</span><span class="p">)</span>
-<span class="n">load_button</span><span class="p">.</span><span class="n">on_click</span><span class="p">(</span><span class="n">load_button_click</span><span class="p">)</span>
-<span class="n">play_slider</span><span class="p">.</span><span class="n">observe</span><span class="p">(</span><span class="n">play_slider_change</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s">'value'</span><span class="p">)</span>
-
-<span class="n">widget_container</span> <span class="o">=</span> <span class="n">widgets</span><span class="p">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">year_slider</span><span class="p">,</span> <span class="n">season_dropdown</span><span class="p">,</span> <span class="n">game_slider</span><span class="p">,</span> <span class="n">load_button</span><span class="p">,</span> <span class="n">play_slider</span><span class="p">])</span>
-<span class="n">display</span><span class="p">(</span><span class="n">widgets</span><span class="p">.</span><span class="n">VBox</span><span class="p">([</span><span class="n">widget_container</span><span class="p">,</span> <span class="n">output_widget</span><span class="p">]))</span>
-</code></pre></div></div>
-<p><br /><br /><br /></p>
-<h2 id="4-tidy-data"><strong>4. Tidy Data</strong></h2>
-
-<p><strong>Question 1</strong>: Here is an example of the dataframe outputted for game ID 2017021050 which occurred on 2018-03-10 between MTL and TBL.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: right">game_id</th>
-      <th style="text-align: left">homeTeam</th>
-      <th style="text-align: left">awayTeam</th>
-      <th style="text-align: left">periodType</th>
-      <th style="text-align: right">period</th>
-      <th style="text-align: left">periodTime</th>
-      <th style="text-align: left">team</th>
-      <th style="text-align: left">eventType</th>
-      <th style="text-align: right">x coordinate</th>
-      <th style="text-align: right">y coordinate</th>
-      <th style="text-align: left">goal_location</th>
-      <th style="text-align: left">shooter</th>
-      <th style="text-align: left">goalie</th>
-      <th style="text-align: left">shotType</th>
-      <th style="text-align: left">emptyNet</th>
-      <th style="text-align: left">strength</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">00:15</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">47</td>
-      <td style="text-align: right">-25</td>
-      <td style="text-align: left">Left</td>
-      <td style="text-align: left">Dan Girardi</td>
-      <td style="text-align: left">Antti Niemi</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">00:35</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">-54</td>
-      <td style="text-align: right">-3</td>
-      <td style="text-align: left">Right</td>
-      <td style="text-align: left">Andrew Shaw</td>
-      <td style="text-align: left">Louis Domingue</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">04:10</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">Goal</td>
-      <td style="text-align: right">-62</td>
-      <td style="text-align: right">14</td>
-      <td style="text-align: left">Right</td>
-      <td style="text-align: left">Artturi Lehkonen</td>
-      <td style="text-align: left">Louis Domingue</td>
-      <td style="text-align: left">Slap Shot</td>
-      <td style="text-align: left">False</td>
-      <td style="text-align: left">PPG</td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">05:50</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">-62</td>
-      <td style="text-align: right">11</td>
-      <td style="text-align: left">Right</td>
-      <td style="text-align: left">Alex Galchenyuk</td>
-      <td style="text-align: left">Louis Domingue</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">08:17</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">-58</td>
-      <td style="text-align: right">-19</td>
-      <td style="text-align: left">Right</td>
-      <td style="text-align: left">Nicolas Deslauriers</td>
-      <td style="text-align: left">Louis Domingue</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">08:48</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">60</td>
-      <td style="text-align: right">0</td>
-      <td style="text-align: left">Left</td>
-      <td style="text-align: left">Brayden Point</td>
-      <td style="text-align: left">Antti Niemi</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">09:21</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">-67</td>
-      <td style="text-align: right">-12</td>
-      <td style="text-align: left">Right</td>
-      <td style="text-align: left">Alex Galchenyuk</td>
-      <td style="text-align: left">Louis Domingue</td>
-      <td style="text-align: left">Snap Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">11:04</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">38</td>
-      <td style="text-align: right">28</td>
-      <td style="text-align: left">Left</td>
-      <td style="text-align: left">Victor Hedman</td>
-      <td style="text-align: left">Antti Niemi</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">11:31</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">58</td>
-      <td style="text-align: right">10</td>
-      <td style="text-align: left">Left</td>
-      <td style="text-align: left">Brayden Point</td>
-      <td style="text-align: left">Antti Niemi</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-    <tr>
-      <td style="text-align: right">2017021050</td>
-      <td style="text-align: left">TBL</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">REGULAR</td>
-      <td style="text-align: right">1</td>
-      <td style="text-align: left">12:14</td>
-      <td style="text-align: left">MTL</td>
-      <td style="text-align: left">Shot</td>
-      <td style="text-align: right">-80</td>
-      <td style="text-align: right">-2</td>
-      <td style="text-align: left">Right</td>
-      <td style="text-align: left">Charles Hudon</td>
-      <td style="text-align: left">Louis Domingue</td>
-      <td style="text-align: left">Wrist Shot</td>
-      <td style="text-align: left"> </td>
-      <td style="text-align: left"> </td>
-    </tr>
-  </tbody>
-</table>
-
-<p><strong>Question 2</strong>: We can keep track of penalty events by capturing crucial details like the players involved, their team, and the duration of the penalty stored in the event’s JSON object. This allows us to maintain a record of active penalties and dynamically update the number of players on the ice, subtracting those in the penalty box from the standard 5, within the specified time interval. In doing so, we determine the details (ex: 5 on 4) of each powerplay.</p>
-
-<p><strong>Question 3</strong>: We could keep track of the face-offs, capturing valuable statistics not only throughout a single game, but also enabling us to keep track of players’ ability to win face-offs and track their progress throughout a season. Furthermore, we can compile data on missed shots and goals, along with respective player information, allowing us to generate a dataset enabling us to compute key metrics like the missed-to-successful goals ratio throughout the entire season.</p>
-
-<p><br /><br /><br /></p>
-<h2 id="5-simple-visualization"><strong>5. Simple Visualization</strong></h2>
-
-<p><strong>Question 1</strong>: Here we chose 2018 as the season, outputting the count of all the shot types and the shot types which gained goals. We can see from the first plot that the most common shot type is the <strong>‘Wrist shot’</strong>, because it counts the most. And from the second the most dangerous shot type is the <strong>‘Tip-in’</strong> because it is the shot type with the highest probability of scoring.</p>
-
-<p><img src="../images/sv_q1.png" alt="SV_Q1" /></p>
-
-<p><strong>Question 2</strong>: In this section we divide the maximum shot distance to the goal in the direction of attack (determined by the home and away stadiums of the teams) into 20 intervals, and for each interval the number of shots and the number of points scored are counted, and the probability of scoring a goal in each interval is computed and represented in the form of a bar chart as well as a linear graph.<br /></p>
-
-<p><img src="../images/sv_q2_1.png" alt="SV_Q2_1" />
-<img src="../images/sv_q2_2.png" alt="SV_Q2_2" />
-<img src="../images/sv_q2_3.png" alt="SV_Q2_3" /></p>
-
-<p>From the three images, we can see that the relationship between shooting distance and scoring chances roughly shows a U-shaped curve with two high ends and a low middle. That is, the probability of scoring is highest when the shot is closest to the goal, then decreases gradually as the distance increases, and then the curve bounces back after it reaches the lowest point, and the probability of scoring gradually increases as the distance increases. The relationship has not seen a great deal of change over the three seasons and has largely followed this pattern.</p>
-
-<p><strong>Question 3</strong>: In this section, we had intended to follow the bar chart format of the previous section and generate a percentage stacked bar chart by dividing the probability of scoring in each interval by the percentage of different shot types. However, this would only give a rough idea of the relationship between the percentage of different shots in each interval, which is not very intuitive and not conducive to useful conclusions. So we calculated the probability of scoring for different shot types in each interval separately, and used this to generate a heat map.</p>
-
-<p><img src="../images/sv_q3.png" alt="SV_Q3" /></p>
-
-<p>From the heat map, we can easily see that the shot type <strong>‘Deflected’</strong> has a good probability of scoring in most of the shot distance intervals, so we consider this shot type to be the one that poses the greatest threat to the enemy team, i.e., the most dangerous shot type.</p>
+<p>All models perform worse on the test set for playoff season as well, as compared to the validation sets. Moreover, their performance is a little worse than what it was for the regular season test set. 
+This is evident from the fact that the area under ROC curves for the classifier is lesser as compared to the regular season test set. Furthermore, the calibration plots in this case also have significant 
+vertical deviations indicating a substantial discrepancy between the predicted probabilities and the actual outcomes at higher probability ranges.</p>
+<blockquote>
+  <blockquote>
+    <blockquote>
+      <blockquote>
+        <blockquote>
+          <blockquote>
+            <blockquote>
+              <p>Stashed changes</p>
+            </blockquote>
+          </blockquote>
+        </blockquote>
+      </blockquote>
+    </blockquote>
+  </blockquote>
+</blockquote>
 
   </div>
   
