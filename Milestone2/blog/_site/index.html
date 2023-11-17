@@ -177,9 +177,9 @@ A well-calibrated model should have points that lie close to the “perfectly ca
 The calibration plot shows that Distance, Angle and Distance-angle are calibrated while the random baseline is poorly calibrated, with most predictions clustered at the low probability end and not aligning with the diagonal line representing perfect calibration.distance-angle is passing the perfect line to the point that we can consider over fitting.but we can assume that feature selectioon play a important role in model calibration.
 To improve the model, it may be necessary to explore more complex models, additional features, or different data preprocessing techniques.</p>
 <h3 id="question-4"><strong>Question 4</strong>:</h3>
-<p><br />distance: https://www.comet.com/api/registry/model/item/download?modelItemId=NNWWTsrccam0dBkAcTD6tY43f<br />
-<br />angle: https://www.comet.com/api/registry/model/item/download?modelItemId=mtVkSF73afL3TmKZM9VDKXqbP<br />
-<br />distance-angle: https://www.comet.com/api/registry/model/item/download?modelItemId=RmkwRg4fFcR9QHAXOde2xh3G6<br /></p>
+<p><br />Logistic Regression Distance: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/976e951b6afd44de9aef1a9524fcf6f2?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/976e951b6afd44de9aef1a9524fcf6f2?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br />
+<br />Logistic Regression Angle: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f64365671ef04d90b10997ee382232ee?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f64365671ef04d90b10997ee382232ee?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br />
+<br />Logistic Regression Distance-Angle: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/5f068b961b7e4ac48bfd3010e0697582?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/5f068b961b7e4ac48bfd3010e0697582?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a><br /></p>
 <h2 id="4-feature-engineering-ii"><strong>4. Feature Engineering II</strong></h2>
 
 <p>The following are feature names outputted by <code class="language-plaintext highlighter-rouge">feature_eng2_cleaned</code> (i.e., our feature engineering function provided in <code class="language-plaintext highlighter-rouge">Milestone2/features/feature_eng2.py</code>) with their respective descriptions:</p>
@@ -221,6 +221,7 @@ To improve the model, it may be necessary to explore more complex models, additi
 <p><img src="../images/homeplayers.png" alt="hp" />
 <img src="../images/awayplayers.png" alt="ap" /></p>
 
+<p>Comet link for DataFrame: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ad9395a05a6d42a4ab5c1d25595692f9?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=step">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ad9395a05a6d42a4ab5c1d25595692f9?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=step</a></p>
 <h2 id="5-advanced-models"><strong>5. Advanced Models</strong></h2>
 
 <h3 id="question-1-2"><strong>Question 1</strong>:</h3>
@@ -301,7 +302,7 @@ To verify the optimal feature set, the following <code class="language-plaintext
 <p>The XGBoost model after feature selection performs a little better than the XGBoost baseline model as the F1, Precision and Recall scores are higher for the model trained after feature selection. 
 Moreover, there is a very minute difference in the area under the ROC curve between XGBoost with feature selection and XGBoost baseline which indicates that both the models predict an event as a goal or not roughly the same number of times. 
 Furthermore, the calibration plots of both the models are equally spread and display the same characteristic and both models can equally predict with higher probability if a shot is a goal.<br /><br />
-Comet experiment link: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f84debbe6d67469fb4103a8efb869988?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f84debbe6d67469fb4103a8efb869988?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a></p>
+Comet experiment link: <a href="https://www.comet.com/ift6758b-project-b10/nhl-project-b10/003cfd6101b74b0cb01539faea73dc67?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall">https://www.comet.com/ift6758b-project-b10/nhl-project-b10/003cfd6101b74b0cb01539faea73dc67?experiment-tab=panels&amp;showOutliers=true&amp;smoothing=0&amp;xAxis=wall</a></p>
 
 <h2 id="6-give-it-your-best-shot"><strong>6. Give it your best shot!</strong></h2>
 
@@ -334,10 +335,7 @@ Comet experiment link for Adaboost (max_depth=10): <a href="https://www.comet.co
 <h2 id="7-evaluate-on-test-set"><strong>7. Evaluate on test set</strong></h2>
 
 <h3 id="question-1-4"><strong>Question 1</strong>:</h3>
-<p>«««&lt; Updated upstream</p>
-<h3 id="question-2-4"><strong>Question 2</strong>:</h3>
-<p>=======
-The figures for Regular season are as follows:
+<p>The figures for Regular season are as follows:
 <img src="../images/7-1a-ROC.png" alt="7_1_ROC" />
 <img src="../images/7-1b-goal-rate.png" alt="7_1_goal" />
 <img src="../images/7-1c-cumulative.png" alt="7_1_cumulative" />
@@ -346,7 +344,7 @@ The figures for Regular season are as follows:
 <p>All models perform worse on the test set for regular season as compared to the validation set. The area under the ROC curves are more or less similar for all the classifiers 
 but the large amount of vertical deviations in the calibration plot indicates a substantial discrepancy between the predicted probabilities and the actual outcomes at higher probability ranges. However, for lower probability ranges,
 the calibration plot maintains the same behaviour. This can be due to the fact that since most of the events are no goals, the model correctly predicts the probabilities of those events.</p>
-<h3 id="question-2-5"><strong>Question 2</strong>:</h3>
+<h3 id="question-2-4"><strong>Question 2</strong>:</h3>
 <p>The figures for Playoffs are as follows:
 <img src="../images/7-2a-ROC.png" alt="7_2_ROC" />
 <img src="../images/7-2b-goal-rate.png" alt="7_2_goal" />

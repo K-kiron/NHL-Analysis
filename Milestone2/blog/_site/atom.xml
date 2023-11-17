@@ -4,7 +4,7 @@
  <title>NHL Analytics Blog</title>
  <link href="http://localhost:4000/atom.xml" rel="self"/>
  <link href="http://localhost:4000/"/>
- <updated>2023-11-16T23:20:47-05:00</updated>
+ <updated>2023-11-16T23:49:40-05:00</updated>
  <id>http://localhost:4000</id>
  <author>
    <name></name>
@@ -98,9 +98,9 @@ A well-calibrated model should have points that lie close to the “perfectly ca
 The calibration plot shows that Distance, Angle and Distance-angle are calibrated while the random baseline is poorly calibrated, with most predictions clustered at the low probability end and not aligning with the diagonal line representing perfect calibration.distance-angle is passing the perfect line to the point that we can consider over fitting.but we can assume that feature selectioon play a important role in model calibration.
 To improve the model, it may be necessary to explore more complex models, additional features, or different data preprocessing techniques.&lt;/p&gt;
 &lt;h3 id=&quot;question-4&quot;&gt;&lt;strong&gt;Question 4&lt;/strong&gt;:&lt;/h3&gt;
-&lt;p&gt;&lt;br /&gt;distance: https://www.comet.com/api/registry/model/item/download?modelItemId=NNWWTsrccam0dBkAcTD6tY43f&lt;br /&gt;
-&lt;br /&gt;angle: https://www.comet.com/api/registry/model/item/download?modelItemId=mtVkSF73afL3TmKZM9VDKXqbP&lt;br /&gt;
-&lt;br /&gt;distance-angle: https://www.comet.com/api/registry/model/item/download?modelItemId=RmkwRg4fFcR9QHAXOde2xh3G6&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;Logistic Regression Distance: &lt;a href=&quot;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/976e951b6afd44de9aef1a9524fcf6f2?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&quot;&gt;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/976e951b6afd44de9aef1a9524fcf6f2?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&lt;/a&gt;&lt;br /&gt;
+&lt;br /&gt;Logistic Regression Angle: &lt;a href=&quot;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f64365671ef04d90b10997ee382232ee?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&quot;&gt;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f64365671ef04d90b10997ee382232ee?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&lt;/a&gt;&lt;br /&gt;
+&lt;br /&gt;Logistic Regression Distance-Angle: &lt;a href=&quot;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/5f068b961b7e4ac48bfd3010e0697582?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&quot;&gt;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/5f068b961b7e4ac48bfd3010e0697582?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&lt;/a&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h2 id=&quot;4-feature-engineering-ii&quot;&gt;&lt;strong&gt;4. Feature Engineering II&lt;/strong&gt;&lt;/h2&gt;
 
 &lt;p&gt;The following are feature names outputted by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;feature_eng2_cleaned&lt;/code&gt; (i.e., our feature engineering function provided in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Milestone2/features/feature_eng2.py&lt;/code&gt;) with their respective descriptions:&lt;/p&gt;
@@ -142,6 +142,7 @@ To improve the model, it may be necessary to explore more complex models, additi
 &lt;p&gt;&lt;img src=&quot;../images/homeplayers.png&quot; alt=&quot;hp&quot; /&gt;
 &lt;img src=&quot;../images/awayplayers.png&quot; alt=&quot;ap&quot; /&gt;&lt;/p&gt;
 
+&lt;p&gt;Comet link for DataFrame: &lt;a href=&quot;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ad9395a05a6d42a4ab5c1d25595692f9?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=step&quot;&gt;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/ad9395a05a6d42a4ab5c1d25595692f9?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=step&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&quot;5-advanced-models&quot;&gt;&lt;strong&gt;5. Advanced Models&lt;/strong&gt;&lt;/h2&gt;
 
 &lt;h3 id=&quot;question-1-2&quot;&gt;&lt;strong&gt;Question 1&lt;/strong&gt;:&lt;/h3&gt;
@@ -222,7 +223,7 @@ To verify the optimal feature set, the following &lt;code class=&quot;language-p
 &lt;p&gt;The XGBoost model after feature selection performs a little better than the XGBoost baseline model as the F1, Precision and Recall scores are higher for the model trained after feature selection. 
 Moreover, there is a very minute difference in the area under the ROC curve between XGBoost with feature selection and XGBoost baseline which indicates that both the models predict an event as a goal or not roughly the same number of times. 
 Furthermore, the calibration plots of both the models are equally spread and display the same characteristic and both models can equally predict with higher probability if a shot is a goal.&lt;br /&gt;&lt;br /&gt;
-Comet experiment link: &lt;a href=&quot;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f84debbe6d67469fb4103a8efb869988?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&quot;&gt;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/f84debbe6d67469fb4103a8efb869988?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&lt;/a&gt;&lt;/p&gt;
+Comet experiment link: &lt;a href=&quot;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/003cfd6101b74b0cb01539faea73dc67?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&quot;&gt;https://www.comet.com/ift6758b-project-b10/nhl-project-b10/003cfd6101b74b0cb01539faea73dc67?experiment-tab=panels&amp;amp;showOutliers=true&amp;amp;smoothing=0&amp;amp;xAxis=wall&lt;/a&gt;&lt;/p&gt;
 
 &lt;h2 id=&quot;6-give-it-your-best-shot&quot;&gt;&lt;strong&gt;6. Give it your best shot!&lt;/strong&gt;&lt;/h2&gt;
 
@@ -255,10 +256,7 @@ Comet experiment link for Adaboost (max_depth=10): &lt;a href=&quot;https://www.
 &lt;h2 id=&quot;7-evaluate-on-test-set&quot;&gt;&lt;strong&gt;7. Evaluate on test set&lt;/strong&gt;&lt;/h2&gt;
 
 &lt;h3 id=&quot;question-1-4&quot;&gt;&lt;strong&gt;Question 1&lt;/strong&gt;:&lt;/h3&gt;
-&lt;p&gt;«««&amp;lt; Updated upstream&lt;/p&gt;
-&lt;h3 id=&quot;question-2-4&quot;&gt;&lt;strong&gt;Question 2&lt;/strong&gt;:&lt;/h3&gt;
-&lt;p&gt;=======
-The figures for Regular season are as follows:
+&lt;p&gt;The figures for Regular season are as follows:
 &lt;img src=&quot;../images/7-1a-ROC.png&quot; alt=&quot;7_1_ROC&quot; /&gt;
 &lt;img src=&quot;../images/7-1b-goal-rate.png&quot; alt=&quot;7_1_goal&quot; /&gt;
 &lt;img src=&quot;../images/7-1c-cumulative.png&quot; alt=&quot;7_1_cumulative&quot; /&gt;
@@ -267,7 +265,7 @@ The figures for Regular season are as follows:
 &lt;p&gt;All models perform worse on the test set for regular season as compared to the validation set. The area under the ROC curves are more or less similar for all the classifiers 
 but the large amount of vertical deviations in the calibration plot indicates a substantial discrepancy between the predicted probabilities and the actual outcomes at higher probability ranges. However, for lower probability ranges,
 the calibration plot maintains the same behaviour. This can be due to the fact that since most of the events are no goals, the model correctly predicts the probabilities of those events.&lt;/p&gt;
-&lt;h3 id=&quot;question-2-5&quot;&gt;&lt;strong&gt;Question 2&lt;/strong&gt;:&lt;/h3&gt;
+&lt;h3 id=&quot;question-2-4&quot;&gt;&lt;strong&gt;Question 2&lt;/strong&gt;:&lt;/h3&gt;
 &lt;p&gt;The figures for Playoffs are as follows:
 &lt;img src=&quot;../images/7-2a-ROC.png&quot; alt=&quot;7_2_ROC&quot; /&gt;
 &lt;img src=&quot;../images/7-2b-goal-rate.png&quot; alt=&quot;7_2_goal&quot; /&gt;
