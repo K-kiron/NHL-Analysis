@@ -9,6 +9,7 @@ from matplotlib.gridspec import GridSpec
 import matplotlib.ticker as ticker
 import xgboost as xgb
 
+# Reference for plot code: https://github.com/AxelBogos/NHL-Analytics/blob/master/ift6758/ift6758/models/create_figure.py
 def plot_ROC(y_val, y_pred_prob, title, filenm):
     """
     Plots an ROC curve for the given y (ground truth) and model probabilities, and calculates the AUC.
