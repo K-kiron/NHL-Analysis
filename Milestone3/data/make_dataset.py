@@ -23,7 +23,7 @@ class scrape_nhl_data:
             json.dump(content, f, ensure_ascii=False, indent=4)
 
     def scrape_data(self, game_id, game_type, path):
-        endpoint = f'https://statsapi.web.nhl.com/api/v1/game/{game_id}/feed/live/'
+        endpoint = f'https://api-web.nhle.com/v1/gamecenter/{game_id}/play-by-play'
         try:
             time.sleep(0.5)
             res = req.get(endpoint)
