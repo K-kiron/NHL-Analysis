@@ -1,3 +1,6 @@
 *.json
 *.DS_Store
-
+*.pkl
+Milestone2/models/COMET_API_KEY.txt
+COMET_API_KEY.txt
+Milestone2/features/train_df.csv
