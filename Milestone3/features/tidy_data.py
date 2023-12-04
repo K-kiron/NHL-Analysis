@@ -19,6 +19,17 @@ variable_translation = {
 
 
 def compute_goal_data(goalLocation: str, x_coordinate: float, y_coordinate: float):
+    """
+    Fctn computing shot angle and shot distance
+    Arguments:
+        goalLocation (str): goal location ('left' or 'right')
+        x_coordinate (float): x coordinate of shooter 
+        y_coordinate (float): y coordinate of shooter 
+
+    Returns: shotDistance (float), shotAngle (float)
+
+    """
+
     if goalLocation == 'left' and y_coordinate is not None:
                 shotangle = np.degrees(np.arctan2(np.abs(y_coordinate), np.abs(x_coordinate - 89)))
     elif goalLocation == 'right' and y_coordinate is not None:
@@ -36,6 +47,20 @@ def compute_goal_data(goalLocation: str, x_coordinate: float, y_coordinate: floa
     return shotDistance, shotangle
 
 def tidy_data(path, year, season, game_id):
+    """
+    Fctn computing all event features for a given game
+    These are game_id homeTeam awayTeam periodType  period periodTime team eventType \ \
+    x_coordinate  y_coordinate goal_location  shooter  \
+    goalie    shotType emptyNet strength  shotAngle  shotDistance 
+    Arguments:
+        path (str): path to data
+        year (int): game year
+        season (str): "regular" or "playoff"
+        game id (int): game ID number from NHL API assignment
+
+    Returns: pd.Dataframe
+    """
+
     with open(os.path.join(f'{path}/{year}/{season}/', f'{game_id}.json'), 'r') as file:
         game_data = json.load(file)
     
@@ -129,22 +154,7 @@ def tidy_data(path, year, season, game_id):
 
             else:
                 goal_location = None
-            #if team == homeTeam:
-            #    if period > 3:
-            #        period = 4
-            #    try:
-            #        goalLocation = game_data['liveData']['linescore']['periods'][period-1]['home']['rinkSide']
-            #    except KeyError:
-            #        goalLocation = None
-                    
-            #elif team == awayTeam:
-            #    if period > 3:
-            #        period = 4
-            #    try:
-            #        goalLocation = game_data['liveData']['linescore']['periods'][period-1]['away']['rinkSide']
-            #    except KeyError:
-            #        goalLocation = None
-                    
+                
             shotDistance, shotAngle = compute_goal_data(goal_location, x_coordinate, y_coordinate)
             
             shot_data = {
