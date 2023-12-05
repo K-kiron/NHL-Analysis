@@ -27,7 +27,7 @@ def before_first_request():
     # TODO: setup basic logging configuration
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
-# RUN : curl http://127.0.0.1:5000/logs
+# RUN : curl http://IP_ADDRESS:PORT/logs
 @app.route("/logs", methods=["GET"])
 def logs():
     try:
@@ -38,7 +38,7 @@ def logs():
     except Exception as e:
         return jsonify({f'You have encountered the following ERROR @ {datetime.datetime.now()}': str(e)})
 
-#Ex: curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b project b10", "project": "nhl-project-b10", "model": "adaboost-max-depth-1-v2", "version": "1.0.1"}' http://127.0.0.1:5000/download_registry_model
+#Ex: curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b project b10", "project": "nhl-project-b10", "model": "adaboost-max-depth-1-v2", "version": "1.0.1"}' http://IP_ADDRESS:PORT/download_registry_model
 @app.route("/download_registry_model", methods=["POST"])
 def download_registry_model():
     """
@@ -83,10 +83,7 @@ def download_registry_model():
                 # if it succeeds, load that model and write to the log
                 # see Comet API documentation
                 # https://www.comet.com/docs/v2/api-and-sdk/python-sdk/reference/APIExperiment/#apiexperimentdownload_model
-                #experiment = api.get(f"{workspace}/{project}/{model}")
                 experiment = api.get_model(workspace=workspace, model_name=model_name)
-                #experiment = get_model(workspace=workspace, project=project, model=model, version=version)
-                
                 experiment.download(version, parent_model_path, expand=True)
 
                 # Making sure the .pkl file that is downloaded has appropriate naming for further retrieval
@@ -95,7 +92,6 @@ def download_registry_model():
 
                 pkl_file = (updated_files - initial_files).pop()
 
-                # Set the new desired filename
                 os.rename(pkl_file, model_name+".pkl")
                 model = joblib.load(model_path)
                 response = {'NOTIFICATION': f"Currently loaded model {model_name} from CometML DOWNLOAD @ {datetime.datetime.now()}"}
@@ -112,7 +108,7 @@ def download_registry_model():
     except Exception as e:
         return jsonify({f'You have encountered the following ERROR @ {datetime.datetime.now()}': str(e)})
 
-# RUN: curl -X POST -H "Content-Type: application/json" --data @input.json http://127.0.0.1:5000/predict
+# RUN: curl -X POST -H "Content-Type: application/json" --data @input.json http://IP_ADDRESS:PORT/predict
 @app.route("/predict", methods=["POST"])
 def predict():
     """
@@ -124,15 +120,9 @@ def predict():
         # Need to run /download_registry_model prior
         global model_name
         model = joblib.load(parent_model_path+model_name+".pkl")
-        
-        #with open(request, 'r') as file:
-        #    file_contents = json.load(file)
-
         json_data = request.get_json()
         app.logger.info(json_data)
         df = pd.DataFrame.from_dict(json_data, orient='columns')
-        #df = pd.DataFrame.from_dict(file_contents, orient='columns')
-        #predictions = [model.predict_proba(pd.DataFrame([data]))[:, 1] for data in json_data]
         predictions = model.predict_proba(df)
         response = {'MODEL predications': predictions.tolist()}
         app.logger.info(response)
