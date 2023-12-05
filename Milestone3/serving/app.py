@@ -56,6 +56,7 @@ def download_registry_model():
         }
     
     """
+    
     try:
         global model_name
         json_data = request.get_json()
@@ -65,8 +66,8 @@ def download_registry_model():
         version = json_data.get('version')      # model version (ex: "1.0.1")
 
         # Specify COMET_API_KEY below
-        api = API(api_key="example_key_1234")
-        #api = API(api_key="M0ld212AYoT5RG6UcLL807o5T")
+        #api = API(api_key="example_key_1234")
+        api = API(api_key="M0ld212AYoT5RG6UcLL807o5T")
 
         # TODO: check to see if the model you are querying for is already downloaded
         model_path = f"{model_name}.pkl"
