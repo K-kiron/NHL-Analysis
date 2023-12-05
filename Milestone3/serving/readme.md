@@ -2,7 +2,7 @@
 <a name="readme-top"></a>
 
 <!-- CONTRIBUTING -->
-## Contributing
+## RUNNING FLASK APP
 
 To use the Flask app (`../Milestone3/serving/app.py`), you must:
 
