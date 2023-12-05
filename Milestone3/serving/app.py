@@ -101,7 +101,6 @@ def download_registry_model():
                 response = {'NOTIFICATION': f"ERROR (Failure to download) @ {datetime.datetime.now()}: {e}"}
                 app.logger.error(response)
 
-        response = {'NOTIFICATION': f'Model {model_name} loaded successfully either LOCALLY or from CometML DOWNLOAD @ {datetime.datetime.now()}'}
         app.logger.info(response)
         return jsonify(response)
 
