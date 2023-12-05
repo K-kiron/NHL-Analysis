@@ -12,6 +12,8 @@ from comet_ml import API
 import datetime
 import time
 
+parent_model_path = "./"
+
 app = Flask(__name__)
 
 LOG_FILE = os.environ.get("FLASK_LOG", "flask.log")
@@ -76,7 +78,6 @@ def download_registry_model():
             app.logger.info(response)
         # TODO: if no, try downloading the model
         else:
-            parent_model_path = "./"
             initial_files = set(os.listdir(parent_model_path))
             try:
                 # if it succeeds, load that model and write to the log
@@ -122,7 +123,7 @@ def predict():
     try:
         # Need to run /download_registry_model prior
         global model_name
-        model = joblib.load(model_name+".pkl")
+        model = joblib.load(parent_model_path+model_name+".pkl")
         
         #with open(request, 'r') as file:
         #    file_contents = json.load(file)
