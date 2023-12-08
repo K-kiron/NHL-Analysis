@@ -64,10 +64,14 @@ def download_registry_model():
         workspace = json_data.get('workspace')  # Is "ift6758b-project-b10"
         model_name = json_data.get('model')     # REGISTERED model name (ex: "adaboost-max-depth-1-v2")
         version = json_data.get('version')      # model version (ex: "1.0.1")
-        experiment_key = json_data.get('experiment_key')
+        #experiment_key = json_data.get('experiment_key')
+        api_key = os.environ.get("COMET_API_KEY")
+        if not api_key:
+            raise ValueError("Unanble to retrieve ${COMET_API_KEY} environment variable")
+        api = API(api_key=api_key)
 
         # Specify COMET_API_KEY below
-        api = API(experiment_key=experiment_key)
+        #api = API(experiment_key=experiment_key)
 
         # TODO: check to see if the model you are querying for is already downloaded
         model_path = f"{model_name}.pkl"
@@ -102,6 +106,7 @@ def download_registry_model():
                 response = {'NOTIFICATION': f"ERROR (Failure to download) @ {datetime.datetime.now()}: {e}"}
                 app.logger.error(response)
 
+        #response = {'NOTIFICATION': f'Model {model_name} loaded successfully either LOCALLY or from CometML DOWNLOAD @ {datetime.datetime.now()}'}
         app.logger.info(response)
         return jsonify(response)
 
