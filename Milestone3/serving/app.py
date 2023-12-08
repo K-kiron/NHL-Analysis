@@ -127,9 +127,11 @@ def predict():
         model = joblib.load(parent_model_path+model_name+".pkl")
         json_data = request.get_json()
         app.logger.info(json_data)
+        
+        
         df = pd.DataFrame.from_dict(json_data, orient='columns')
         predictions = model.predict_proba(df)
-        response = {'MODEL predications': predictions.tolist()}
+        response = {'MODEL predictions': predictions.tolist()}
         app.logger.info(response)
         return jsonify(response)
 
