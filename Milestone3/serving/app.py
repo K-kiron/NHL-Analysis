@@ -67,7 +67,8 @@ def download_registry_model():
         #experiment_key = json_data.get('experiment_key')
         api_key = os.environ.get("COMET_API_KEY")
         if not api_key:
-            raise ValueError("Unanble to retrieve ${COMET_API_KEY} environment variable")
+            response = {'NOTIFICATION': "Unanble to retrieve ${COMET_API_KEY} environment variable"}
+            app.logger.info(response)
         api = API(api_key=api_key)
 
         # Specify COMET_API_KEY below
