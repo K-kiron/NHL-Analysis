@@ -28,12 +28,23 @@ class ServingClient:
             X (Dataframe): Input dataframe to submit to the prediction service.
         """
 
-        raise NotImplementedError("TODO: implement this function")
+        response = requests.post(
+            f"{self.base_url}/predict", data=json.dumps(X.to_dict(orient="records"))
+        )
+
+        if response.status_code != 200:
+            raise RuntimeError(f"Server responded with error: {response.text}")
+        
+        return pd.DataFrame(response.json())
 
     def logs(self) -> dict:
         """Get server logs"""
 
-        raise NotImplementedError("TODO: implement this function")
+        response = requests.get(f"{self.base_url}/logs")
+        if response.status_code != 200:
+            raise RuntimeError(f"Server responded with error: {response.text}")
+
+        return response.json()
 
     def download_registry_model(self, workspace: str, model: str, version: str) -> dict:
         """
@@ -51,4 +62,29 @@ class ServingClient:
             version (str): The model version to download
         """
 
-        raise NotImplementedError("TODO: implement this function")
+        response = requests.post(
+            f"{self.base_url}/download_registry_model",
+            data=json.dumps({"workspace": workspace, "model": model, "version": version}),
+        )
+
+        if response.status_code != 200:
+            raise RuntimeError(f"Server responded with error: {response.text}")
+
+        return response.json()
+
+
+
+client = ServingClient(ip='127.0.0.1', port=5000)
+
+# Test predict method
+test_data = pd.DataFrame({'shotDistance': [78], 'shotAngle': [2]})
+prediction = client.predict(test_data)
+print(prediction)
+
+# Test logs method
+logs = client.logs()
+print(logs)
+
+# Test download_registry_model method
+model_info = client.download_registry_model('workspace', 'model', 'version')
+print(model_info)
