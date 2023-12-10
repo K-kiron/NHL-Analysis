@@ -25,4 +25,4 @@ r = requests.post(
     json=json.loads(X.to_json())
 )
 ```
-6. To obtain a model prediction from a model downloaded from COMET or loaded locally using Flask app directly from the terminal, run `curl -X POST -H "Content-Type: application/json" --data @JSON_FILENAME.json http://IP_ADDRESS:PORT/predict`. Note that JSON_FILENAME.json must be specified. 
+6. To obtain a model prediction from a model downloaded from COMET or loaded locally using Flask app directly from the terminal, run `curl -X POST -H "Content-Type: application/json" --data @PATH/TO/.../JSON_FILENAME.json http://IP_ADDRESS:PORT/predict`. Note that JSON_FILENAME.json must be specified. 
