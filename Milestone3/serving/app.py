@@ -32,9 +32,13 @@ def before_first_request():
 def logs():
     try:
         # TODO: read the log file specified and return the data
+        response = {}
         with open(LOG_FILE, "r") as file:
-            LOGS = file.read()
-        return jsonify({f'/logs endpoint @ {datetime.datetime.now()}': LOGS})
+            for i in file:
+                response[i] = i
+        #    LOGS = file.read()
+        #return jsonify({f'/logs endpoint @ {datetime.datetime.now()}': LOGS})
+        return jsonify(response)
     except Exception as e:
         return jsonify({f'You have encountered the following ERROR @ {datetime.datetime.now()}': str(e)})
 
