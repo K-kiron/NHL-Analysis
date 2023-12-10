@@ -10,6 +10,9 @@ To use the Flask app (`../Milestone3/serving/app.py`), you must:
 2. To access endpoints `/logs`, `/download_registry_model`, or `/predict`, open a new terminal and follow the subsequent instructions
 3. To get `/logs`, run `curl http://IP_ADDRESS:PORT/logs`
 4. To load a model (either from Comet or locally from `.pkl` file stored in `../../serving/`), run `curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b-project-b10", "model": "MODEL_NAME", "version": "NUMBER.NUMBER.NUMBER"}' http://IP_ADDRESS:PORT/download_registry_model`. Note that all the comet retrieval info can be stored in a `.json` file (stored in `/serving`). This json file would have the structure seen below, for example. Take care to save the file with UTF-8 encoding. You can thereby load a model by running the command `curl -X POST -H "Content-Type: application/json" -d @PATH/TO/.../serving/FILENAME.json http://IP_ADDRESS:PORT/download_registry_model`. 
+
+`curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b-project-b10", "model": "adaboost-max-depth-1-v2", "version": "1.0.1"}' http://127.0.0.1:5000/download_registry_model`
+`curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b-project-b10", "model": "5-3-xgboost-with-feature-selection", "version": "1.3.0"}' http://127.0.0.1:5000/download_registry_model`
 ```
 {
     "workspace": "ift6758b-project-b10",
