@@ -85,16 +85,28 @@ class ServingClient:
 
 client = ServingClient(ip='127.0.0.1', port=5000)
 
-# Test predict method
-test_data = pd.DataFrame({'shotDistance': [78], 'shotAngle': [2]})
-prediction = client.predict(test_data)
-print(prediction)
-
 # Test logs method
 logs = client.logs()
 print(logs)
 
 # Test download_registry_model method
-model_info = client.download_registry_model('ift6758b-project-b10', '5-3-xgboost-with-feature-selection', '1.3.0')
-# model_info = client.download_registry_model('ift6758b-project-b10', 'adaboost-max-depth-1-v2', '1.0.1')
+# model_info = client.download_registry_model('ift6758b-project-b10', '5-3-xgboost-with-feature-selection', '1.3.0')
+model_info = client.download_registry_model('ift6758b-project-b10', 'adaboost-max-depth-1-v2', '1.0.1')
 print(model_info)
+
+
+# Test predict method
+with open('test_data.json', 'r') as file:
+    json_data = json.load(file)
+
+test_data = pd.DataFrame.from_dict(json_data, orient='columns')
+prediction = client.predict(test_data)
+print(prediction)
+
+# test_data = pd.DataFrame({'shotDistance': [78], 'shotAngle': [2]})
+# prediction = client.predict(test_data)
+# print(prediction)
+
+# Test logs method
+#logs = client.logs()
+#print(logs)

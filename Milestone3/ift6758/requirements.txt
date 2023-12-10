@@ -8,10 +8,12 @@ tqdm
 lxml
 plotly
 setuptools
-flask
+flask==2.1.0
 gunicorn
-scikit-learn
+scikit-learn==1.2.2
 comet_ml
 jupyterlab
 ipywidgets
 streamlit
+xgboost
+werkzeug==2.2.2
