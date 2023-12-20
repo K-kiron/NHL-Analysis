@@ -7,7 +7,7 @@ import sys
 import os
 from IPython.display import display
 
-PROJECT_PATH = '../../../../Milestone3/'
+PROJECT_PATH = '../../Milestone3/'
 sys.path.append(PROJECT_PATH)
 from features.tidy_data import compute_goal_data
 # from serving.app import app
@@ -129,7 +129,7 @@ class GameClient:
                     return pd.DataFrame()
 
         except requests.RequestException as e:
-            logger.error(f"Error fetching data for game ID {self.game_id}: {e}")
+            # app.logger.error(f"Error fetching data for game ID {self.game_id}: {e}")
             return pd.DataFrame()
 
         

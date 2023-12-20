@@ -5,8 +5,8 @@ import pandas as pd
 import sys
 import os
 
-PROJECT_PATH = '../../../../Milestone3/'
-sys.path.append(PROJECT_PATH)
+# PROJECT_PATH = '../../Milestone3/'
+# sys.path.append(PROJECT_PATH)
 # from serving.app import app
 
 
