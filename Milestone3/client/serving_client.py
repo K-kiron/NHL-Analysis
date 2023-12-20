@@ -1,13 +1,13 @@
 import json
 import requests
 import pandas as pd
-import logging
+# import logging
 import sys
 import os
 
-PROJECT_PATH = '../../../../Milestone3/'
-sys.path.append(PROJECT_PATH)
-from serving.app import app
+# PROJECT_PATH = '../../Milestone3/'
+# sys.path.append(PROJECT_PATH)
+# from serving.app import app
 
 
 # logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ headers = {'Content-Type': 'application/json'}
 class ServingClient:
     def __init__(self, ip: str = "0.0.0.0", port: int = 5000, features=None):
         self.base_url = f"http://{ip}:{port}"
-        app.logger.info(f"Initializing client; base URL: {self.base_url}")
+        # app.logger.info(f"Initializing client; base URL: {self.base_url}")
 
         if features is None:
             features = ["distance"]
