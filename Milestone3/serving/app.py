@@ -1,6 +1,5 @@
 import os
 import logging
-from logging.handlers import RotatingFileHandler
 from flask import Flask, jsonify, request
 import pandas as pd
 import joblib
@@ -19,13 +18,6 @@ app = Flask(__name__)
 
 LOG_FILE = os.environ.get("FLASK_LOG", "flask.log")
 
-handler = RotatingFileHandler(LOG_FILE, maxBytes=10000, backupCount=1)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-app.logger.addHandler(handler)
-app.logger.setLevel(logging.INFO)
-
 @app.before_first_request
 def before_first_request():
     """
@@ -40,9 +32,13 @@ def before_first_request():
 def logs():
     try:
         # TODO: read the log file specified and return the data
+        response = {}
         with open(LOG_FILE, "r") as file:
-            LOGS = file.read()
-        return jsonify({f'/logs endpoint @ {datetime.datetime.now()}': LOGS})
+            for i in file:
+                response[i] = i
+        #    LOGS = file.read()
+        #return jsonify({f'/logs endpoint @ {datetime.datetime.now()}': LOGS})
+        return jsonify(response)
     except Exception as e:
         return jsonify({f'You have encountered the following ERROR @ {datetime.datetime.now()}': str(e)})
 
@@ -149,4 +145,3 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
-

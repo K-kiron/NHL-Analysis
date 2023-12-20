@@ -1,15 +1,16 @@
 import json
 import requests
 import pandas as pd
-import logging
+# import logging
 import numpy as np
 import sys
+import os
 from IPython.display import display
 
 PROJECT_PATH = '../../../../Milestone3/'
 sys.path.append(PROJECT_PATH)
 from features.tidy_data import compute_goal_data
-from serving.app import app
+# from serving.app import app
 
 variable_translation = {
     'shot-on-goal': 'Shot',
@@ -23,7 +24,7 @@ variable_translation = {
     'OT': 'OVERTIME',
 }
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 headers = {'Content-Type': 'application/json'}
 
 def is_identical(file1_path: str, file2: json) -> bool:
@@ -86,7 +87,7 @@ class GameClient:
     def __init__(self, game_id: int):
         self.game_id = game_id
         self.base_url = f"http://127.0.0.1:5000"
-        app.logger.info(f"Initializing client; base URL: {self.base_url}")
+        # app.logger.info(f"Initializing client; base URL: {self.base_url}")
 
 
     def ping_game(self) -> pd.DataFrame:
@@ -102,8 +103,8 @@ class GameClient:
             response.raise_for_status()
             game_data = response.json()
 
-            print(self.game_id)
-            print(id_set)
+            if not os.path.exists('live_raw'):
+                os.makedirs('live_raw')
             
             if self.game_id not in id_set:
                 print("Loading new game data...")
