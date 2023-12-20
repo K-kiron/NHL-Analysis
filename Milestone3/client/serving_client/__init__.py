@@ -14,7 +14,7 @@ import os
 headers = {'Content-Type': 'application/json'}
 
 class ServingClient:
-    def __init__(self, ip: str = "0.0.0.0", port: int = 5000, features=None):
+    def __init__(self, ip: str = "0.0.0.0", port: int = 8000, features=None):
         self.base_url = f"http://{ip}:{port}"
         # app.logger.info(f"Initializing client; base URL: {self.base_url}")
 
@@ -35,8 +35,9 @@ class ServingClient:
         """
 
         response = requests.post(
-            f"{self.base_url}/predict", data=json.dumps(X.to_dict(orient="records")), headers=headers
+            f"{self.base_url}/predict", json=json.loads(X.to_json()), headers=headers
         )
+        print(response.json())
 
         if response.status_code != 200:
             raise RuntimeError(f"Server responded with error: {response.text}")
@@ -79,35 +80,35 @@ class ServingClient:
 
         response = requests.post(
             f"{self.base_url}/download_registry_model",
-            data=json.dumps({"workspace": workspace, "model": model, "version": version}), headers=headers
+            json={"workspace": workspace, "model": model, "version": version}, headers=headers
         )
 
-        if response.status_code != 200:
-            raise RuntimeError(f"Server responded with error: {response.text}")
+        # if response.status_code != 200:
+        #     raise RuntimeError(f"Server responded with error: {response.text}")
 
-        return response.json()
+        return response
 
 
 
-client = ServingClient(ip='127.0.0.1', port=5000)
+# client = ServingClient(ip='127.0.0.1', port=5000)
 
 # Test logs method
-logs = client.logs()
-print(logs)
+# logs = client.logs()
+# print(logs)
 
 # Test download_registry_model method
 # model_info = client.download_registry_model('ift6758b-project-b10', '5-3-xgboost-with-feature-selection', '1.3.0')
-model_info = client.download_registry_model('ift6758b-project-b10', 'adaboost-max-depth-1-v2', '1.0.1')
-print(model_info)
+# model_info = client.download_registry_model('ift6758b-project-b10', 'adaboost-max-depth-1-v2', '1.0.1')
+# print(model_info)
 
 
 # Test predict method
-with open('test_data.json', 'r') as file:
-    json_data = json.load(file)
-
-test_data = pd.DataFrame.from_dict(json_data, orient='columns')
-prediction = client.predict(test_data)
-print(prediction)
+# with open('test_data.json', 'r') as file:
+#     json_data = json.load(file)
+#
+# test_data = pd.DataFrame.from_dict(json_data, orient='columns')
+# prediction = client.predict(test_data)
+# print(prediction)
 
 # test_data = pd.DataFrame({'shotDistance': [78], 'shotAngle': [2]})
 # prediction = client.predict(test_data)
