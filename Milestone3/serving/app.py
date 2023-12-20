@@ -1,6 +1,5 @@
 import os
 import logging
-from logging.handlers import RotatingFileHandler
 from flask import Flask, jsonify, request
 import pandas as pd
 import joblib
@@ -18,13 +17,6 @@ parent_model_path = "./"
 app = Flask(__name__)
 
 LOG_FILE = os.environ.get("FLASK_LOG", "flask.log")
-
-handler = RotatingFileHandler(LOG_FILE, maxBytes=10000, backupCount=1)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-app.logger.addHandler(handler)
-app.logger.setLevel(logging.INFO)
 
 @app.before_first_request
 def before_first_request():
@@ -153,4 +145,3 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
