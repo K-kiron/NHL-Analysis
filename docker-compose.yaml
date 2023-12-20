@@ -1,0 +1,13 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  serving:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.serving
+    ports:
+      - "8000:8000"
+    environment:
+      - COMET_API_KEY=${COMET_API_KEY}
+

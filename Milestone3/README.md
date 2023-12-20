@@ -1,10 +1,13 @@
-# Milestone 2
+# Milestone 3
 
 ### Instructions for running the code
 
-Unlike Milestone 1, the path to access the data is a bit different.
-
 The PATHs used for this milestone are:
 
-    DATA_PATH = "../../IFT6758_DATA" -> This is the path when running a script inside the Milestone2 folder
-    PROJECT_PATH = '../../Milestone2/'
+    DATA_PATH = "~/IFT6758_DATA"
+    PROJECT_PATH = '~/Milestone3/'
+
+
+### It is strongly recommended to use the environment provided in the requirements.txt file. To do so, run the following commands:
+
+    pip install -r requirements.txt
