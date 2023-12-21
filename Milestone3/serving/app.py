@@ -5,6 +5,7 @@ import pandas as pd
 import joblib
 import requests
 import json
+import comet_ml
 from comet_ml import API
 
 # To specify time at which logs were sent
@@ -27,6 +28,30 @@ def before_first_request():
     # TODO: setup basic logging configuration
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
+    #comet_ml.init()
+    
+    #global model_name
+
+    # Loading default model ("log_reg_basemodel_distance")
+    #if not os.path.exists(parent_model_path+"log_reg_basemodel_distance.pkl"):
+        #api_key = os.environ.get("COMET_API_KEY")
+        #api = API(api_key=api_key)
+        #api.download_registry_model("ift6758b-project-b10", "log_reg_basemodel_distance", "1.1.0")
+
+    #default_model = "log_reg_basemodel_distance"
+
+    #time.sleep(2)
+    """
+    #global model, model_name
+    model_name = default_model
+
+    if os.path.exists(parent_model_path+"log_reg_basemodel_distance.pkl"):
+        model = joblib.load(parent_model_path+"log_reg_basemodel_distance.pkl")
+        response = {'NOTIFICATION': f"Default model {model_name} loaded successfully from LOCAL @ {datetime.datetime.now()}"}
+        app.logger.info(response)
+    """
+
+
 # RUN : curl http://IP_ADDRESS:PORT/logs
 @app.route("/logs", methods=["GET"])
 def logs():
@@ -42,23 +67,7 @@ def logs():
     except Exception as e:
         return jsonify({f'You have encountered the following ERROR @ {datetime.datetime.now()}': str(e)})
 
-default_model_filename = "log_reg_basemodel_distance_2023-11-16 00:42:39.348668"
-model_name = None
 
-def default_load():
-    global model, model_name
-    default_model_path = os.path.join(parent_model_path, default_model_filename + ".pkl")
-    if os.path.exists(default_model_path):
-        model = joblib.load(default_model_path)
-        model_name = "log_reg_basemodel_distance"
-        response = {'NOTIFICATION': f"Default model {model_name} loaded successfully from LOCAL @ {datetime.datetime.now()}"}
-        app.logger.info(response)
-    else:
-        response = {'NOTIFICATION': f"Error to load default model {model_name} from LOCAL @ {datetime.datetime.now()}"}
-        app.logger.info(response)
-
-# Loading default model upon starting the server
-default_load()
 
 #Ex: curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b project b10", "project": "nhl-project-b10", "model": "adaboost-max-depth-1-v2", "version": "1.0.1"}' http://IP_ADDRESS:PORT/download_registry_model
 @app.route("/download_registry_model", methods=["POST"])
@@ -119,9 +128,10 @@ def download_registry_model():
                     time.sleep(2)
                     updated_files = set(os.listdir(parent_model_path))
 
+                    # Yalda's issue is most likely here
                     pkl_file = (updated_files - initial_files).pop()
-
                     os.rename(pkl_file, model_candidate+".pkl")
+
                     model = joblib.load(model_path)
                     response = {'NOTIFICATION': f"Currently loaded model {model_candidate} from CometML DOWNLOAD @ {datetime.datetime.now()}"}
                     status_code = 200
@@ -156,7 +166,6 @@ def predict():
         model = joblib.load(parent_model_path+model_name+".pkl")
         json_data = request.get_json()
         app.logger.info(json_data)
-        
         
         df = pd.DataFrame.from_dict(json_data, orient='columns')
 
