@@ -50,10 +50,10 @@ def load_default_model():
     default_model_path = os.path.join(parent_model_path, default_model_filename + ".pkl")
     if os.path.exists(default_model_path):
         model = joblib.load(default_model_path)
-        model_name = default_model_name
-        app.logger.info(f"Default model {default_model_name} loaded successfully.")
+        model_name = "log_reg_basemodel_distance"
+        app.logger.info(f"Default model {model_name} loaded successfully.")
     else:
-        app.logger.error(f"Default model {default_model_name} not found.")
+        app.logger.error(f"Default model {model_name} not found.")
 
 # Loading default model upon starting the server
 load_default_model()
