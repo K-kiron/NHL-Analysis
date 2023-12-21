@@ -45,18 +45,20 @@ def logs():
 default_model_filename = "log_reg_basemodel_distance_2023-11-16 00:42:39.348668"
 model_name = None
 
-def load_default_model():
+def default_load():
     global model, model_name
     default_model_path = os.path.join(parent_model_path, default_model_filename + ".pkl")
     if os.path.exists(default_model_path):
         model = joblib.load(default_model_path)
         model_name = "log_reg_basemodel_distance"
-        app.logger.info(f"Default model {model_name} loaded successfully.")
+        response = {'NOTIFICATION': f"Default model {model_name} loaded successfully from LOCAL @ {datetime.datetime.now()}"}
+        app.logger.info(response)
     else:
-        app.logger.error(f"Default model {model_name} not found.")
+        response = {'NOTIFICATION': f"Error to load default model {model_name} from LOCAL @ {datetime.datetime.now()}"}
+        app.logger.info(response)
 
 # Loading default model upon starting the server
-load_default_model()
+default_load()
 
 #Ex: curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b project b10", "project": "nhl-project-b10", "model": "adaboost-max-depth-1-v2", "version": "1.0.1"}' http://IP_ADDRESS:PORT/download_registry_model
 @app.route("/download_registry_model", methods=["POST"])
