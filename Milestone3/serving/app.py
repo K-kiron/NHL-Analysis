@@ -42,6 +42,22 @@ def logs():
     except Exception as e:
         return jsonify({f'You have encountered the following ERROR @ {datetime.datetime.now()}': str(e)})
 
+default_model_filename = "log_reg_basemodel_distance_2023-11-16 00:42:39.348668"
+model_name = None
+
+def load_default_model():
+    global model, model_name
+    default_model_path = os.path.join(parent_model_path, default_model_filename + ".pkl")
+    if os.path.exists(default_model_path):
+        model = joblib.load(default_model_path)
+        model_name = default_model_name
+        app.logger.info(f"Default model {default_model_name} loaded successfully.")
+    else:
+        app.logger.error(f"Default model {default_model_name} not found.")
+
+# Loading default model upon starting the server
+load_default_model()
+
 #Ex: curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b project b10", "project": "nhl-project-b10", "model": "adaboost-max-depth-1-v2", "version": "1.0.1"}' http://IP_ADDRESS:PORT/download_registry_model
 @app.route("/download_registry_model", methods=["POST"])
 def download_registry_model():
@@ -62,22 +78,19 @@ def download_registry_model():
     """
     
     try:
-        global model_name
+        global model, model_name
         status_code = 400
         json_data = request.get_json()
 
         workspace = json_data.get('workspace')  # Is "ift6758b-project-b10"
         model_candidate = json_data.get('model')     # REGISTERED model name (ex: "adaboost-max-depth-1-v2")
         version = json_data.get('version')      # model version (ex: "1.0.1")
-        #experiment_key = json_data.get('experiment_key')
         api_key = os.environ.get("COMET_API_KEY")
         if not api_key:
             response = {'NOTIFICATION': "Unable to retrieve ${COMET_API_KEY} environment variable"}
             app.logger.info(response)
         api = API(api_key=api_key)
 
-        # Specify COMET_API_KEY below
-        #api = API(experiment_key=experiment_key)
 
         # TODO: check to see if the model you are querying for is already downloaded
         model_path = f"{model_candidate}.pkl"
@@ -144,6 +157,14 @@ def predict():
         
         
         df = pd.DataFrame.from_dict(json_data, orient='columns')
+
+        if model_name == 'log_reg_basemodel_distance':
+            df = df[['shotDistance']]
+        elif model_name = 'log_reg_basemodel_angle':
+            df = df[['shotAngle']]
+        elif model_name = 'log_reg_basemodel_distance_angle':
+            df = df[['shotDistance','shotAngle']]
+
         predictions = model.predict_proba(df)
         response = {'MODEL predictions': predictions.tolist()}
         app.logger.info(response)
