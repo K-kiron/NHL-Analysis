@@ -162,9 +162,9 @@ def predict():
 
         if model_name == 'log_reg_basemodel_distance':
             df = df[['shotDistance']]
-        elif model_name = 'log_reg_basemodel_angle':
+        elif model_name == 'log_reg_basemodel_angle':
             df = df[['shotAngle']]
-        elif model_name = 'log_reg_basemodel_distance_angle':
+        elif model_name == 'log_reg_basemodel_distance_angle':
             df = df[['shotDistance','shotAngle']]
 
         predictions = model.predict_proba(df)
