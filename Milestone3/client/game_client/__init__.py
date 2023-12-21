@@ -5,7 +5,6 @@ import pandas as pd
 import numpy as np
 import sys
 import os
-from IPython.display import display
 
 PROJECT_PATH = '../../Milestone3/'
 sys.path.append(PROJECT_PATH)
@@ -62,35 +61,13 @@ def read_update_partial_data(update_file_path: str, old_file_path: str) -> json:
     updated_data = {key: update_data[key] for key in update_data if key not in old_data or update_data[key] != old_data[key]}
     return updated_data
 
-def load_id_set(file_path: str) -> set:
-    """
-    Load the set of game ids.
-
-    Args:
-        file_path (str): Path to the file containing the set of game ids.
-
-    Returns:
-        set: The set of game ids.
-    """
-    try:
-        with open(file_path, 'r') as file:
-            return {int(line.strip()) for line in file}
-    except FileNotFoundError:
-        with open(file_path, 'w') as file:
-            pass
-        return set()
-    
-id_path = 'id_set.txt'
-id_set = load_id_set(id_path)
-
 class GameClient:
-    def __init__(self, game_id: int):
-        self.game_id = game_id
-        self.base_url = f"http://127.0.0.1:5000"
+    def __init__(self):
+        self.base_url = f"http://127.0.0.1:8000"
         # app.logger.info(f"Initializing client; base URL: {self.base_url}")
 
 
-    def ping_game(self) -> pd.DataFrame:
+    def ping_game(self, game_id) -> pd.DataFrame:
         """
         Query the NHL API for live game data and process events.
 
@@ -99,34 +76,35 @@ class GameClient:
         """
         # Fetching live game data from the NHL API
         try:
-            response = requests.get(f"https://api-web.nhle.com/v1/gamecenter/{self.game_id}/play-by-play")
+            response = requests.get(f"https://api-web.nhle.com/v1/gamecenter/{game_id}/play-by-play")
             response.raise_for_status()
             game_data = response.json()
 
             if not os.path.exists('live_raw'):
                 os.makedirs('live_raw')
+
+            file = f'live_raw/{game_id}.json'
             
-            if self.game_id not in id_set:
+            if not os.path.exists(file):
                 print("Loading new game data...")
-                with open(id_path, 'a') as file:
-                    file.write(f"{self.game_id}\n")
-                with open(f'live_raw/{self.game_id}.json', 'w') as f:
+                # with open(id_path, 'a') as file:
+                #     file.write(f"{game_id}\n")
+                with open(file, 'w') as f:
                     json.dump(game_data, f)
                 preprocessed_data = preprocessing(game_data)
-                display(preprocessed_data)
                 return preprocessed_data
             else:
-                if not is_identical(f'live_raw/{self.game_id}.json', game_data):
+                if not is_identical(file, game_data):
                     print("There is an update in the game data!")
-                    with open(f'live_raw/{self.game_id}.json', 'w') as f:
+                    with open(file, 'w') as f:
                         json.dump(game_data, f)
-                    game_data = read_update_partial_data(game_data, f'live_raw/{self.game_id}.json')
+                    game_data = read_update_partial_data(game_data, file)
                     preprocessed_data = preprocessing(game_data)
-                    display(preprocessed_data)
                     return preprocessed_data
                 else:
                     print("No update in the game data!")
-                    return pd.DataFrame()
+                    preprocessed_data = preprocessing(game_data)
+                    return preprocessed_data
 
         except requests.RequestException as e:
             # app.logger.error(f"Error fetching data for game ID {self.game_id}: {e}")
