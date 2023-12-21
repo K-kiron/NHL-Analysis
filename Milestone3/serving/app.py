@@ -150,7 +150,7 @@ def predict():
     """
     try:
         # Need to run /download_registry_model prior
-        global model_name
+        global model, model_name
         model = joblib.load(parent_model_path+model_name+".pkl")
         json_data = request.get_json()
         app.logger.info(json_data)
