@@ -11,3 +11,10 @@ services:
     environment:
       - COMET_API_KEY=${COMET_API_KEY}
 
+  streamlit:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.streamlit
+    ports:
+      - "8050:8050"
+

@@ -14,7 +14,7 @@ import os
 headers = {'Content-Type': 'application/json'}
 
 class ServingClient:
-    def __init__(self, ip: str = "0.0.0.0", port: int = 8000, features=None):
+    def __init__(self, ip: str = "serving", port: int = 8000, features=None):
         self.base_url = f"http://{ip}:{port}"
         # app.logger.info(f"Initializing client; base URL: {self.base_url}")
 
@@ -37,21 +37,22 @@ class ServingClient:
         response = requests.post(
             f"{self.base_url}/predict", json=json.loads(X.to_json()), headers=headers
         )
-        print(response.json())
 
-        if response.status_code != 200:
-            raise RuntimeError(f"Server responded with error: {response.text}")
-        
-        response_data = response.json()
+        return response
 
-        if isinstance(response_data, list):
-            return pd.DataFrame(response_data)
-    
-        elif isinstance(response_data, dict):
-            return pd.DataFrame([response_data])
-    
-        else:
-            raise ValueError("Unexpected format in response data")
+        # if response.status_code != 200:
+        #     raise RuntimeError(f"Server responded with error: {response.text}")
+        #
+        # response_data = response.json()
+        #
+        # if isinstance(response_data, list):
+        #     return pd.DataFrame(response_data)
+        #
+        # elif isinstance(response_data, dict):
+        #     return pd.DataFrame([response_data])
+        #
+        # else:
+        #     raise ValueError("Unexpected format in response data")
 
     def logs(self) -> dict:
         """Get server logs"""
