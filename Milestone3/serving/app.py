@@ -3,9 +3,6 @@ import logging
 from flask import Flask, jsonify, request
 import pandas as pd
 import joblib
-import requests
-import json
-import comet_ml
 from comet_ml import API
 
 # To specify time at which logs were sent
@@ -19,6 +16,26 @@ app = Flask(__name__)
 
 LOG_FILE = os.environ.get("FLASK_LOG", "flask.log")
 
+api_key = os.environ.get("COMET_API_KEY")
+api = API(api_key=api_key)
+
+global model, model_name
+
+# Loading default model ("log_reg_basemodel_distance")
+# if not os.path.exists(parent_model_path+"log_reg_basemodel_distance.pkl"):
+initial_files = set(os.listdir(parent_model_path))
+
+experiment = api.get_model(workspace="ift6758b-project-b10", model_name="log_reg_basemodel_distance")
+experiment.download("1.1.0", parent_model_path, expand=True)
+
+model_name = "log_reg_basemodel_distance"
+updated_files = set(os.listdir(parent_model_path))
+
+pkl_file = (updated_files - initial_files).pop()
+os.rename(pkl_file, model_name + ".pkl")
+
+model = joblib.load(model_name+".pkl")
+
 @app.before_first_request
 def before_first_request():
     """
@@ -27,30 +44,6 @@ def before_first_request():
     """
     # TODO: setup basic logging configuration
     logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
-
-    #comet_ml.init()
-    
-    #global model_name
-
-    # Loading default model ("log_reg_basemodel_distance")
-    #if not os.path.exists(parent_model_path+"log_reg_basemodel_distance.pkl"):
-        #api_key = os.environ.get("COMET_API_KEY")
-        #api = API(api_key=api_key)
-        #api.download_registry_model("ift6758b-project-b10", "log_reg_basemodel_distance", "1.1.0")
-
-    #default_model = "log_reg_basemodel_distance"
-
-    #time.sleep(2)
-    """
-    #global model, model_name
-    model_name = default_model
-
-    if os.path.exists(parent_model_path+"log_reg_basemodel_distance.pkl"):
-        model = joblib.load(parent_model_path+"log_reg_basemodel_distance.pkl")
-        response = {'NOTIFICATION': f"Default model {model_name} loaded successfully from LOCAL @ {datetime.datetime.now()}"}
-        app.logger.info(response)
-    """
-
 
 # RUN : curl http://IP_ADDRESS:PORT/logs
 @app.route("/logs", methods=["GET"])
@@ -66,8 +59,6 @@ def logs():
         return jsonify(response)
     except Exception as e:
         return jsonify({f'You have encountered the following ERROR @ {datetime.datetime.now()}': str(e)})
-
-
 
 #Ex: curl -X POST -H "Content-Type: application/json" -d '{"workspace": "ift6758b project b10", "project": "nhl-project-b10", "model": "adaboost-max-depth-1-v2", "version": "1.0.1"}' http://IP_ADDRESS:PORT/download_registry_model
 @app.route("/download_registry_model", methods=["POST"])
@@ -92,6 +83,7 @@ def download_registry_model():
         global model, model_name
         status_code = 400
         json_data = request.get_json()
+        app.logger.info(f"Model in use before download: {model_name}")
 
         workspace = json_data.get('workspace')  # Is "ift6758b-project-b10"
         model_candidate = json_data.get('model')     # REGISTERED model name (ex: "adaboost-max-depth-1-v2")
@@ -128,7 +120,6 @@ def download_registry_model():
                     time.sleep(2)
                     updated_files = set(os.listdir(parent_model_path))
 
-                    # Yalda's issue is most likely here
                     pkl_file = (updated_files - initial_files).pop()
                     os.rename(pkl_file, model_candidate+".pkl")
 
@@ -176,8 +167,8 @@ def predict():
         elif model_name == 'log_reg_basemodel_distance_angle':
             df = df[['shotDistance','shotAngle']]
 
-        predictions = model.predict_proba(df)
-        response = {'MODEL predictions': predictions.tolist()}
+        predictions = model.predict_proba(df)[:,1]
+        response = {'MODEL predictions': predictions.tolist(), 'features_used': df.columns.values.tolist()}
         app.logger.info(response)
         return jsonify(response), 200
 
