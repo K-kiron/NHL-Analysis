@@ -134,10 +134,10 @@ def tidy_data(path, year, season, game_id):
                     #emptyNet = eventData['result']['emptyNet']
                     emptyNet = 'goalieInNetId' not in eventData['details']
                 except KeyError:
-                    emptyNet = None
+                    emptyNet = False
             #    strength = eventData['result']['strength']['code']
             else:
-                emptyNet = None
+                emptyNet = False
             #    strength = None
             
             if eventData['details']["zoneCode"] == 'D' or eventData['details']["zoneCode"] == 'O':

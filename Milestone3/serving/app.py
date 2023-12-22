@@ -3,8 +3,6 @@ import logging
 from flask import Flask, jsonify, request
 import pandas as pd
 import joblib
-import requests
-import json
 from comet_ml import API
 
 # To specify time at which logs were sent
@@ -17,6 +15,26 @@ parent_model_path = "./"
 app = Flask(__name__)
 
 LOG_FILE = os.environ.get("FLASK_LOG", "flask.log")
+
+api_key = os.environ.get("COMET_API_KEY")
+api = API(api_key=api_key)
+
+global model, model_name
+
+# Loading default model ("log_reg_basemodel_distance")
+# if not os.path.exists(parent_model_path+"log_reg_basemodel_distance.pkl"):
+initial_files = set(os.listdir(parent_model_path))
+
+experiment = api.get_model(workspace="ift6758b-project-b10", model_name="log_reg_basemodel_distance")
+experiment.download("1.1.0", parent_model_path, expand=True)
+
+model_name = "log_reg_basemodel_distance"
+updated_files = set(os.listdir(parent_model_path))
+
+pkl_file = (updated_files - initial_files).pop()
+os.rename(pkl_file, model_name + ".pkl")
+
+model = joblib.load(model_name+".pkl")
 
 @app.before_first_request
 def before_first_request():
@@ -62,22 +80,20 @@ def download_registry_model():
     """
     
     try:
-        global model_name
+        global model, model_name
         status_code = 400
         json_data = request.get_json()
+        app.logger.info(f"Model in use before download: {model_name}")
 
         workspace = json_data.get('workspace')  # Is "ift6758b-project-b10"
         model_candidate = json_data.get('model')     # REGISTERED model name (ex: "adaboost-max-depth-1-v2")
         version = json_data.get('version')      # model version (ex: "1.0.1")
-        #experiment_key = json_data.get('experiment_key')
         api_key = os.environ.get("COMET_API_KEY")
         if not api_key:
             response = {'NOTIFICATION': "Unable to retrieve ${COMET_API_KEY} environment variable"}
             app.logger.info(response)
         api = API(api_key=api_key)
 
-        # Specify COMET_API_KEY below
-        #api = API(experiment_key=experiment_key)
 
         # TODO: check to see if the model you are querying for is already downloaded
         model_path = f"{model_candidate}.pkl"
@@ -105,8 +121,8 @@ def download_registry_model():
                     updated_files = set(os.listdir(parent_model_path))
 
                     pkl_file = (updated_files - initial_files).pop()
-
                     os.rename(pkl_file, model_candidate+".pkl")
+
                     model = joblib.load(model_path)
                     response = {'NOTIFICATION': f"Currently loaded model {model_candidate} from CometML DOWNLOAD @ {datetime.datetime.now()}"}
                     status_code = 200
@@ -137,15 +153,22 @@ def predict():
     """
     try:
         # Need to run /download_registry_model prior
-        global model_name
+        global model, model_name
         model = joblib.load(parent_model_path+model_name+".pkl")
         json_data = request.get_json()
         app.logger.info(json_data)
         
-        
         df = pd.DataFrame.from_dict(json_data, orient='columns')
-        predictions = model.predict_proba(df)
-        response = {'MODEL predictions': predictions.tolist()}
+
+        if model_name == 'log_reg_basemodel_distance':
+            df = df[['shotDistance']]
+        elif model_name == 'log_reg_basemodel_angle':
+            df = df[['shotAngle']]
+        elif model_name == 'log_reg_basemodel_distance_angle':
+            df = df[['shotDistance','shotAngle']]
+
+        predictions = model.predict_proba(df)[:,1]
+        response = {'MODEL predictions': predictions.tolist(), 'features_used': df.columns.values.tolist()}
         app.logger.info(response)
         return jsonify(response), 200
 
