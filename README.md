@@ -26,3 +26,14 @@ If you make updates to your conda `environment.yml`, you can use the update comm
 You can create a new environment file using the `create` command:
 
     conda env export > environment.yml
+
+### Docker
+The repo root contains the `docker-compose.yaml`, outlining the service architecture for the application.<br><br>
+The following steps must be followed to run the application:
+1. Set your experiment key as an environment variable
+   1. On Linux/MacOS: `export COMET_API_KEY=<API_KEY>`. Additionally, execute `source <bashfile>` to ensure that the environment variables are sourced correctly.
+   2. On Windows: `set COMET_API_KEY=<API_KEY>`<br>
+2. Start the Docker daemon on your machine.
+3. Ensure that the terminal is in the repository's root directory (`IFT6758B-Project-B10`).
+4. Exeecute the command `docker-compose up` to launch up the services.
+5. Once the containers are spawned, access the UI at `http://0.0.0.0:8050`.
