@@ -1,28 +1,16 @@
 import json
 import requests
 import pandas as pd
-# import logging
-import sys
-import os
 
-# PROJECT_PATH = '../../Milestone3/'
-# sys.path.append(PROJECT_PATH)
-# from serving.app import app
-
-
-# logger = logging.getLogger(__name__)
 headers = {'Content-Type': 'application/json'}
 
 class ServingClient:
     def __init__(self, ip: str = "serving", port: int = 8000, features=None):
         self.base_url = f"http://{ip}:{port}"
-        # app.logger.info(f"Initializing client; base URL: {self.base_url}")
 
         if features is None:
             features = ["distance"]
         self.features = features
-
-        # any other potential initialization
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
         """
@@ -39,20 +27,6 @@ class ServingClient:
         )
 
         return response
-
-        # if response.status_code != 200:
-        #     raise RuntimeError(f"Server responded with error: {response.text}")
-        #
-        # response_data = response.json()
-        #
-        # if isinstance(response_data, list):
-        #     return pd.DataFrame(response_data)
-        #
-        # elif isinstance(response_data, dict):
-        #     return pd.DataFrame([response_data])
-        #
-        # else:
-        #     raise ValueError("Unexpected format in response data")
 
     def logs(self) -> dict:
         """Get server logs"""
@@ -84,37 +58,4 @@ class ServingClient:
             json={"workspace": workspace, "model": model, "version": version}, headers=headers
         )
 
-        # if response.status_code != 200:
-        #     raise RuntimeError(f"Server responded with error: {response.text}")
-
         return response
-
-
-
-# client = ServingClient(ip='127.0.0.1', port=5000)
-
-# Test logs method
-# logs = client.logs()
-# print(logs)
-
-# Test download_registry_model method
-# model_info = client.download_registry_model('ift6758b-project-b10', '5-3-xgboost-with-feature-selection', '1.3.0')
-# model_info = client.download_registry_model('ift6758b-project-b10', 'adaboost-max-depth-1-v2', '1.0.1')
-# print(model_info)
-
-
-# Test predict method
-# with open('test_data.json', 'r') as file:
-#     json_data = json.load(file)
-#
-# test_data = pd.DataFrame.from_dict(json_data, orient='columns')
-# prediction = client.predict(test_data)
-# print(prediction)
-
-# test_data = pd.DataFrame({'shotDistance': [78], 'shotAngle': [2]})
-# prediction = client.predict(test_data)
-# print(prediction)
-
-# Test logs method
-#logs = client.logs()
-#print(logs)

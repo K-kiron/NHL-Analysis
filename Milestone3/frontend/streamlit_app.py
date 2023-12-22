@@ -1,8 +1,7 @@
 import streamlit as st
 import time
-import numpy as np
 import plotly.graph_objects as go
-import pandas as pd
+import plotly.express as px
 import sys
 sys.path.append('../client')
 
@@ -19,7 +18,7 @@ with (st.sidebar):
 
     ws_name = st.text_input("Workspace", "ift6758b-project-b10")
     model = st.text_input("Model")
-    version = st.text_input("Choose Input 3")
+    version = st.text_input("Version")
 
     if st.button("Get model"):
         res = serving.download_registry_model(workspace=ws_name, model=model, version=version)
@@ -78,91 +77,79 @@ with st.container():
         df = data['data'].set_index('eventType')
         st.dataframe(df[feature_list])
 
-@st.cache
-def update_filtered_df(selected_player, data):
-    filtered_df = data['data'][data['data']['shooter'] == selected_player]
-    return filtered_df
+with st.container():
+    if data:
+        st.title('Shot Location Heatmap')
+
+        df = data['data']
+        df['x_coordinate'] = df.apply(lambda row: -1* row['x_coordinate'] if row['goal_location'] == 'left' else row['x_coordinate'], axis=1)
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scattergl(
+            x=df[df['team'] == data['home_team_code']]['x_coordinate'],
+            y=df[df['team'] == data['home_team_code']]['y_coordinate'],
+            mode='markers',
+            marker=dict(
+                size=14,
+                opacity=0.6,
+                colorscale='Viridis',
+                color='blue'
+            ),
+            name=data['home_team_name'],
+        ))
+
+        fig.add_trace(go.Scattergl(
+            x=df[df['team'] == data['away_team_code']]['x_coordinate'],
+            y=df[df['team'] == data['away_team_code']]['y_coordinate'],
+            mode='markers',
+            marker=dict(
+                size=14,
+                opacity=0.6,
+                colorscale='Viridis',
+                color='red'
+            ),
+            name=data['away_team_name'],
+        ))
+
+        fig.update_layout(
+            title='Shot Location Heatmap',
+            xaxis=dict(title='X Coordinate'),
+            yaxis=dict(title='Y Coordinate'),
+        )
+
+        st.plotly_chart(fig)
+
+        st.write("""
+            The interactive combined shot location map aimed at visualizing the various shot location trend for a given team.
+            X-coordinates of the shots were transformed so that for all the shots the goal was assumed to be on the right side. 
+            This was done to establish a consistent frame of reference.
+            Finally the data was plotted to visualize the trend.
+        """)
 
 with st.container():
     if data:
-        if 'selected_team' not in st.session_state:
-            st.session_state.selected_team = data['home_team_name']
+        shot_events = data['data']
 
-        if 'selected_player' not in st.session_state:
-            st.session_state.selected_player = data['data'].loc[data['data']['team'] == data['home_team_code'], 'shooter'].iloc[0]
+        sum_goal_probs = shot_events.groupby(['shotType', 'team'])['goal_prob_prediction'].sum().reset_index()
 
-        if 'filtered_df' not in st.session_state:
-            st.session_state.filtered_df = data['data'][data['data']['shooter'] == st.session_state.selected_player]
+        sum_goal_probs['team'] = sum_goal_probs['team'].replace(data['home_team_code'], data['home_team_name'])
+        sum_goal_probs['team'] = sum_goal_probs['team'].replace(data['away_team_code'], data['away_team_name'])
 
-        # Streamlit app
-        st.title('Shot Location Heatmap')
+        st.title('Expected Goals for Shot Types Grouped by Teams')
 
-        # col1, col2 = st.columns(2)
-        #
-        # # Sidebar for user input
-        # st.session_state.selected_team = col1.selectbox('Select Team:', [data['home_team_name'], data['away_team_name']],
-        #                                key='team_selector')
-        # code = data['away_team_code'] if st.session_state.selected_team == data['away_team_name'] else data['home_team_code']
-        #
-        # st.session_state.selected_player = col2.selectbox('Select Player:',
-        #                                  data['data'].loc[data['data']['team'] == code, 'shooter'].unique(),
-        #                                  key='player_selector')
+        st.subheader('Visualization for Expected Goals')
+        fig = px.area(sum_goal_probs, x='shotType', y='goal_prob_prediction', color='team',
+                      labels={'goal_prob_prediction': 'Expected Goals', 'shotType': 'Shot Type', 'team': 'Team'},
+                      title='Expected Goals for Shot Types Grouped by Teams',
+                      line_shape='linear',
+                      hover_data={'goal_prob_prediction': ':.2f', 'shotType': False, 'team': False}
+                      )
 
-        # Update filtered_df based on user input
-        filtered_df_home = data['data'][data['data']['team'] == data['home_team_code']]
-        filtered_df_away = data['data'][data['data']['team'] == data['away_team_code']]
-
-        # Create a heatmap using Plotly Graph Objects
-        fig = go.Figure(go.Scattergl(
-            x=filtered_df_home['x_coordinate'],
-            y=filtered_df_home['y_coordinate'],
-            mode='markers',
-            marker=dict(
-                size=14,
-                opacity=0.6,
-                colorscale='Viridis',
-                colorbar=dict(title='Intensity'),
-            ),
-        ))
-
-        # Set axis labels and layout
-        fig.update_layout(
-            title=f"{data['home_team_name']} Shot Location Heatmap",
-            xaxis=dict(title='X Position'),
-            yaxis=dict(title='Y Position'),
-        )
-
-        # Display the heatmap
         st.plotly_chart(fig)
 
-        # Create a heatmap using Plotly Graph Objects
-        fig1 = go.Figure(go.Scattergl(
-            x=filtered_df_away['x_coordinate'],
-            y=filtered_df_away['y_coordinate'],
-            mode='markers',
-            marker=dict(
-                size=14,
-                opacity=0.6,
-                colorscale='Viridis',
-                colorbar=dict(title='Intensity'),
-            ),
-        ))
-
-        # Set axis labels and layout
-        fig1.update_layout(
-            title=f"{data['away_team_name']} Shot Location Heatmap",
-            xaxis=dict(title='X Position'),
-            yaxis=dict(title='Y Position'),
-        )
-
-        # Display the heatmap
-        st.plotly_chart(fig1)
-
-        # Additional information about the feature
         st.write("""
-            Explore the player location heatmap with our Player Location Heatmap feature. 
-            Select a player from the sidebar to visualize the X and Y coordinates of their 
-            positions on the ice. This static heatmap leverages the power of Streamlit and 
-            Plotly to provide an engaging and informative experience for hockey enthusiasts, 
-            allowing you to examine the spatial dynamics of player movements.
+            This visualization aimed at finding the most impactful shot type i.e. the shot type that leads to highest number of expected goals for a given team.
+            For this, the data was grouped by shot type and team and then the individual goal probabilities were summed. The transformed data was then plotted 
+            on an area chart to visualize the trend.
         """)

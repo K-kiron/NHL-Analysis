@@ -9,7 +9,6 @@ import os
 import sys
 sys.path.append('../features')
 from tidy_data import compute_goal_data
-# from serving.app import app
 
 variable_translation = {
     'shot-on-goal': 'Shot',
@@ -23,7 +22,6 @@ variable_translation = {
     'OT': 'OVERTIME',
 }
 
-# logger = logging.getLogger(__name__)
 headers = {'Content-Type': 'application/json'}
 
 def is_identical(file1_path: str, file2: json) -> bool:
@@ -64,8 +62,6 @@ def read_update_partial_data(update_file_path: str, old_file_path: str) -> json:
 class GameClient:
     def __init__(self):
         self.base_url = f"http://serving:8000"
-        # app.logger.info(f"Initializing client; base URL: {self.base_url}")
-
 
     def ping_game(self, game_id) -> pd.DataFrame:
         """
@@ -87,8 +83,6 @@ class GameClient:
             
             if not os.path.exists(file):
                 print("Loading new game data...")
-                # with open(id_path, 'a') as file:
-                #     file.write(f"{game_id}\n")
                 with open(file, 'w') as f:
                     json.dump(game_data, f)
                 preprocessed_data = preprocessing(game_data)
