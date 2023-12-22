@@ -8,7 +8,7 @@
 import sys
 
 DATA_PATH = '../../IFT6758_Data/'
-PROJECT_PATH = '../../Milestone2/'
+PROJECT_PATH = '../../Milestone3/'
 
 sys.path.append(PROJECT_PATH)
 

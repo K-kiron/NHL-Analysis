@@ -21,7 +21,7 @@ from sklearn.feature_selection import SelectFromModel
 print(sklearn.__version__)
 
 DATA_PATH = '../../IFT6758_Data/'
-PROJECT_PATH = '../../Milestone2/'
+PROJECT_PATH = '../../Milestone3/'
 
 import sys
 sys.path.append(PROJECT_PATH)
