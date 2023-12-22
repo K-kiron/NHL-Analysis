@@ -37,8 +37,12 @@ with st.container():
     game_id = st.text_input("Game ID")
     if st.button("Ping game"):
         game_data = game.ping_game(game_id)
-        if game_data['status_code'] == 400:
+        if game_data['status_code'] != 200:
             alert = st.error('Invalid Game ID. Please try again!')
+            time.sleep(3)
+            alert.empty()
+        elif game_data['data'].empty:
+            alert = st.warning('You are early! This game has not happened yet. Please try again later!')
             time.sleep(3)
             alert.empty()
         else:
