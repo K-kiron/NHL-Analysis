@@ -6,10 +6,9 @@ import numpy as np
 import sys
 import os
 
-PROJECT_PATH = '../../Milestone3/'
-sys.path.append(PROJECT_PATH)
-from features.tidy_data import compute_goal_data
-# from serving.app import app
+import sys
+sys.path.append('../features')
+from tidy_data import compute_goal_data
 
 variable_translation = {
     'shot-on-goal': 'Shot',
@@ -23,7 +22,6 @@ variable_translation = {
     'OT': 'OVERTIME',
 }
 
-# logger = logging.getLogger(__name__)
 headers = {'Content-Type': 'application/json'}
 
 def is_identical(file1_path: str, file2: json) -> bool:
@@ -63,9 +61,7 @@ def read_update_partial_data(update_file_path: str, old_file_path: str) -> json:
 
 class GameClient:
     def __init__(self):
-        self.base_url = f"http://127.0.0.1:8000"
-        # app.logger.info(f"Initializing client; base URL: {self.base_url}")
-
+        self.base_url = f"http://serving:8000"
 
     def ping_game(self, game_id) -> pd.DataFrame:
         """
@@ -87,12 +83,9 @@ class GameClient:
             
             if not os.path.exists(file):
                 print("Loading new game data...")
-                # with open(id_path, 'a') as file:
-                #     file.write(f"{game_id}\n")
                 with open(file, 'w') as f:
                     json.dump(game_data, f)
                 preprocessed_data = preprocessing(game_data)
-                return preprocessed_data
             else:
                 if not is_identical(file, game_data):
                     print("There is an update in the game data!")
@@ -100,15 +93,23 @@ class GameClient:
                         json.dump(game_data, f)
                     game_data = read_update_partial_data(game_data, file)
                     preprocessed_data = preprocessing(game_data)
-                    return preprocessed_data
                 else:
                     print("No update in the game data!")
                     preprocessed_data = preprocessing(game_data)
-                    return preprocessed_data
+
+            return {
+                'home_team_name': game_data['homeTeam']['name']['default'],
+                'away_team_name': game_data['awayTeam']['name']['default'],
+                'home_team_code': game_data['homeTeam']['abbrev'],
+                'away_team_code': game_data['awayTeam']['abbrev'],
+                'home_team_score': game_data['homeTeam']['score'],
+                'away_team_score': game_data['awayTeam']['score'],
+                'data': preprocessed_data,
+                "status_code": 200
+            }
 
         except requests.RequestException as e:
-            # app.logger.error(f"Error fetching data for game ID {self.game_id}: {e}")
-            return pd.DataFrame()
+            return {'status_code': 400}
 
         
     
