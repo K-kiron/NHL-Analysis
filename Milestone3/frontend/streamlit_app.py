@@ -37,8 +37,12 @@ with st.container():
     game_id = st.text_input("Game ID")
     if st.button("Ping game"):
         game_data = game.ping_game(game_id)
-        if game_data['status_code'] == 400:
+        if game_data['status_code'] != 200:
             alert = st.error('Invalid Game ID. Please try again!')
+            time.sleep(3)
+            alert.empty()
+        elif game_data['data'].empty:
+            alert = st.warning('You are early! This game has not happened yet. Please try again later!')
             time.sleep(3)
             alert.empty()
         else:
@@ -73,8 +77,10 @@ with st.container():
         st.header(f"Data used for predictions (and predictions)")
         feature_list = data['features_used']
         feature_list.append('goal_prob_prediction')
+        feature_list.insert(0, 'team')
 
         df = data['data'].set_index('eventType')
+        df['team'] = df.apply(lambda row: data['home_team_name'] if row['team'] == data['home_team_code'] else data['away_team_name'], axis=1)
         st.dataframe(df[feature_list])
 
 with st.container():
