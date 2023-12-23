@@ -77,8 +77,10 @@ with st.container():
         st.header(f"Data used for predictions (and predictions)")
         feature_list = data['features_used']
         feature_list.append('goal_prob_prediction')
+        feature_list.insert(0, 'team')
 
         df = data['data'].set_index('eventType')
+        df['team'] = df.apply(lambda row: data['home_team_name'] if row['team'] == data['home_team_code'] else data['away_team_name'], axis=1)
         st.dataframe(df[feature_list])
 
 with st.container():

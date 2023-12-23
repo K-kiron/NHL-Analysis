@@ -1,9 +1,6 @@
 import json
 import requests
 import pandas as pd
-# import logging
-import numpy as np
-import sys
 import os
 
 import sys
@@ -39,25 +36,6 @@ def is_identical(file1_path: str, file2: json) -> bool:
     with open(file1_path, 'r') as file1:
         file1_data = json.load(file1)
         return file1_data == file2
-            
-def read_update_partial_data(update_file_path: str, old_file_path: str) -> json:
-    """
-    Read the update file and return the updated data.
-
-    Args:
-        update_file_path (str): Path to the update file.
-        old_file_path (str): Path to the old file.
-
-    Returns:
-        json: The updated data.
-    """
-    with open(update_file_path, 'r') as update_file:
-        update_data = json.load(update_file)
-    with open(old_file_path, 'r') as old_file:
-        old_data = json.load(old_file)
-
-    updated_data = {key: update_data[key] for key in update_data if key not in old_data or update_data[key] != old_data[key]}
-    return updated_data
 
 class GameClient:
     def __init__(self):
@@ -91,7 +69,6 @@ class GameClient:
                     print("There is an update in the game data!")
                     with open(file, 'w') as f:
                         json.dump(game_data, f)
-                    game_data = read_update_partial_data(game_data, file)
                     preprocessed_data = preprocessing(game_data)
                 else:
                     print("No update in the game data!")
