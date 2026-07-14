@@ -165,5 +165,5 @@ wurlitzer==3.0.3
 xgboost==1.6.2
 y-py==0.6.0
 ypy-websocket==0.8.4
-yt-dlp==2023.9.24
+yt-dlp==2026.6.9
 zipp==3.15.0
